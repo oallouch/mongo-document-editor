@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/node/AbstractNode.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/util/ui/FXMLUtil.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/MongoDocumentEditor.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/command/fxml/QueryBuilder.fxml</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/MongoDocumentEditorFX.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/module/QueryTreeBuilder.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/module/json/JsonArea.java</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/module/fxml/QueryTreeBuilder.fxml</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/module/fxml/fxml.css</file>
+            <file>file:/C:/Users/Antec/Documents/GitHub/mongo-document-editor/src/com/oallouch/mongodoc/ui/module/fxml/FXMLController.java</file>
+        </group>
+    </open-files>
+</project-private>
