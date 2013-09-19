@@ -1,6 +1,6 @@
 package com.oallouch.mongodoc;
 
-import com.oallouch.mongodoc.ui.module.QueryTreeBuilder;
+import com.oallouch.mongodoc.tree.DocumentTree;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -11,10 +11,31 @@ public class MongoDocumentEditorFX extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		QueryTreeBuilder queryTreeBuilder = new QueryTreeBuilder();
+		DocumentEditor documentEditor = new DocumentEditor();
+
+		documentEditor.setJsonText(
+			"{\n" +
+			"  \"menu\": \"Fichier\",\n" +
+			"  \"commandes\": [\n" +
+			"      {\n" +
+			"          \"title\": \"Nouveau\",\n" +
+			"          \"action\":\"CreateDoc\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"          \"title\": \"Ouvrir\",\n" +
+			"          \"action\": \"OpenDoc\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"          \"title\": \"Fermer\",\n" +
+			"          \"action\": \"CloseDoc\"\n" +
+			"      }\n" +
+			"   ]\n" +
+			"} "
+		);
+
 
 		StackPane root = new StackPane();
-		root.getChildren().add(queryTreeBuilder);
+		root.getChildren().add(documentEditor);
 
 		Scene scene = new Scene(root, 300, 250);
 

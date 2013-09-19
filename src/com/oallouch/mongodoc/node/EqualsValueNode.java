@@ -5,11 +5,6 @@ import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-/*
- * A simple wrapper used to handle a property (like a key)
- * 
- * This is managed by the PropertiesNode class.
- */
 public class EqualsValueNode extends AbstractNode {
 	private static int counter;
 	private ObjectProperty value = new SimpleObjectProperty();
@@ -22,11 +17,8 @@ public class EqualsValueNode extends AbstractNode {
 		setValue(value);
 	}
 
-    /*
-     * Generate an error because these DBO are build by the parent of the property
-     */
     @Override
-    public Object getDBOValue() {
+    public Object getJsonElement() {
 		return value;
     }
 

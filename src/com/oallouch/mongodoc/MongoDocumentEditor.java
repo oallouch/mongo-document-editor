@@ -1,6 +1,6 @@
 package com.oallouch.mongodoc;
 
-import com.oallouch.mongodoc.ui.module.QueryTreeBuilder;
+import com.oallouch.mongodoc.tree.DocumentTree;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
@@ -26,29 +26,9 @@ public class MongoDocumentEditor {
 					public void run() {
 						Group root = new Group();
 						Scene scene = new Scene(root, 300, 250, Color.WHITE);
-						QueryTreeBuilder queryTreeBuilder = new QueryTreeBuilder();
-						root.getChildren().add(queryTreeBuilder);
+						DocumentEditor documentEditor = new DocumentEditor();
+						root.getChildren().add(documentEditor);
 						fxPanel.setScene(scene);
-
-						/*
-						{
-  "menu": "Fichier",
-  "commandes": [
-      {
-          "title": "Nouveau",
-          "action":"CreateDoc"
-      },
-      {
-          "title": "Ouvrir",
-          "action": "OpenDoc"
-      },
-      {
-          "title": "Fermer",
-          "action": "CloseDoc"
-      }
-   ]
-} 
-						*/
 					}
 				});
 			}

@@ -60,7 +60,7 @@ public abstract class AbstractNode {
     /*
      * Return the current value stored in the node
      */
-    public abstract Object getDBOValue();
+    public abstract Object getJsonElement();
 
     /*
      * Add a child to the node.

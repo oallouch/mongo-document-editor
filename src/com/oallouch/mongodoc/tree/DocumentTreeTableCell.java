@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.ui.module;
+package com.oallouch.mongodoc.tree;
 
-public class QueryTreeTableCell extends AbstractTreeTableCell {
+public class DocumentTreeTableCell extends AbstractTreeTableCell {
 }

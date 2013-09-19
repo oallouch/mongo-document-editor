@@ -1,65 +1,46 @@
-package com.oallouch.mongodoc.ui.module;
+package com.oallouch.mongodoc.tree;
 
 import com.oallouch.mongodoc.node.AbstractNode;
 import com.oallouch.mongodoc.node.PropertiesNode;
 import com.oallouch.mongodoc.node.WithSingleChildNode;
-import com.oallouch.mongodoc.ui.module.json.JsonArea;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionModel;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.input.InputEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 
-/**
- *
- * @author INTEGRATION
- */
-public class QueryTreeBuilder extends StackPane {
+public class DocumentTree extends StackPane {
     // Observer list
-    private ArrayList<QueryTreeObserver> observers;
+    private ArrayList<DocumentTreeObserver> observers;
     // edit form factory
     //private QueryTreeEditorFactory factory;
 
+	private PropertiesNode rootNode;
 	private TreeTableView<AbstractNode> treeTable;
     private Menu cmiNodes;
     private MenuItem cmiRemove;
     
-    public QueryTreeBuilder() {
+    public DocumentTree() {
         observers = new ArrayList<>();
-		SplitPane splitPane = new SplitPane();
         // Set the tree view not resizable when container grow up
         //SplitPane.setResizableWithParent(bpLeft, Boolean.FALSE);
 
 		treeTable = new TreeTableView<>();
 		TreeTableColumn<AbstractNode, Object> nameCol = new TreeTableColumn<>("Name");
-		nameCol.setCellFactory(new Callback<TreeTableColumn<AbstractNode, Object>, TreeTableCell<AbstractNode, Object>>() {
-			@Override
-			public TreeTableCell<AbstractNode, Object> call(TreeTableColumn<AbstractNode, Object> treeTableColumn) {
-				return new QueryTreeTableCell();
-			}
-		});
+		nameCol.setCellFactory((TreeTableColumn<AbstractNode, Object> treeTableColumn) -> new DocumentTreeTableCell());
 
 		TreeTableColumn<AbstractNode, Object> valueCol = new TreeTableColumn<>("Value");
-		valueCol.setCellFactory(new Callback<TreeTableColumn<AbstractNode, Object>, TreeTableCell<AbstractNode, Object>>() {
-			@Override
-			public TreeTableCell<AbstractNode, Object> call(TreeTableColumn<AbstractNode, Object> treeTableColumn) {
-				return new SecondColumnTreeTableCell();
-			}
-		});
+		valueCol.setCellFactory((TreeTableColumn<AbstractNode, Object> treeTableColumn) -> new SecondColumnTreeTableCell());
 
 		treeTable.getColumns().setAll(nameCol, valueCol);
 		//treeTable.setTreeColumn(nameCol);
@@ -70,19 +51,7 @@ public class QueryTreeBuilder extends StackPane {
 		// . found in TreeTableCellBehavior.simpleSelect(MouseEvent e) (7th line of the method)
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
 
-		final JsonArea jsonArea = new JsonArea();
-		jsonArea.addEventHandler(JsonArea.MODIFIED, new EventHandler<InputEvent>() {
-			@Override
-			public void handle(InputEvent event) {
-				AbstractNode node = jsonArea.getNode();
-				setNode(node);
-			}
-		});
-
-		splitPane.getItems().addAll(new StackPane(treeTable), new StackPane(jsonArea));
-		splitPane.setDividerPositions(0.5f, 0.5f);
-
-		this.getChildren().add(splitPane);
+		this.getChildren().add(treeTable);
         /*
          * Set the tvTreeView selection handler so it will show an edit form
          * when selecting a node is focused/selected
@@ -116,11 +85,15 @@ public class QueryTreeBuilder extends StackPane {
      */
     @FXML
     public void resetQuery() {
-        setNode(new PropertiesNode());
+        setRootNode(new PropertiesNode());
     }
 
-	public void setNode(AbstractNode node) {
-        TreeItem<AbstractNode> newRoot = createTreeItem(node);
+	public PropertiesNode getRootNode() {
+		return rootNode;
+	}
+	public void setRootNode(PropertiesNode rootNode) {
+		this.rootNode = rootNode;
+        TreeItem<AbstractNode> newRoot = createTreeItem(rootNode);
         treeTable.setRoot(newRoot);
         treeTable.getSelectionModel().select(newRoot);
         updateObservers();
@@ -217,17 +190,17 @@ public class QueryTreeBuilder extends StackPane {
         sModel.selectPrevious();
     }
     
-    public void addObserver(QueryTreeObserver observer) {
+    public void addObserver(DocumentTreeObserver observer) {
         observers.add(observer);
         updateObservers();
     }
     
-    public void removeObserver(QueryTreeObserver observer) {
+    public void removeObserver(DocumentTreeObserver observer) {
         observers.remove(observer);
     }
     
     private void updateObservers() {
-        for(QueryTreeObserver ob : observers) {
+        for(DocumentTreeObserver ob : observers) {
             ob.updateQuery(treeTable.getRoot().getValue());
         }
     }

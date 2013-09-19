@@ -1,8 +1,9 @@
 package com.oallouch.mongodoc.node;
 
-import com.oallouch.mongodoc.util.db.DBO;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /*
@@ -34,27 +35,20 @@ public class PropertiesNode extends AbstractNode {
     }
 
     /*
-     * Chain the properties and their children to make the right DBO
+     * Chain the properties and their children to make a Map
      */
     @Override
-    public Object getDBOValue() {
-        int count = getChildCount();
-        //------------------------ 0 ------------------------//
-        if (count == 0) {
-            // Can't be empty
-            throw new IllegalStateException("No PropertyNode");
-        }
-      
-        DBO dbo = new DBO();
+    public Object getJsonElement() {
+		Map<String, Object> jsonObject = Maps.newHashMapWithExpectedSize(getChildCount());
         for (AbstractNode child : getChildren()) {
             PropertyNode prop = (PropertyNode) child;
 			if(prop.getChild(0) == null) {
                 prop.setError("A Property value can't be null");
                 continue;
             }
-            dbo.put(prop.getName(), prop.getChild(0).getDBOValue());
+            jsonObject.put(prop.getName(), prop.getChild(0).getJsonElement());
         }
-        return dbo;
+        return jsonObject;
     }
 
 	@Override

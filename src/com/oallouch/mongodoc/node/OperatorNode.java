@@ -64,12 +64,9 @@ public class OperatorNode extends WithSingleChildNode {
 		return null;
 	}
 
-    /*
-     * Generate an error because it's the Operator call who manage the DBOValue of theses nodes
-     */
     @Override
-    public Object getDBOValue() {
-        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by OperatorsNode");
+    public Object getJsonElement() {
+        throw new IllegalArgumentException("getJsonElement can't be called directly. The json element is built by OperatorsNode");
     }
 
     public Operator getOperator() {

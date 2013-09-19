@@ -1,47 +1,41 @@
 package com.oallouch.mongodoc.node;
 
-import java.util.ArrayList;
-import java.util.List;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 /*
- * A simple wrapper used to handle a property (like a key)
- * 
- * This is managed by the PropertiesNode class.
+ * This is managed by the ArrayNode class.
  */
-public class PropertyNode extends WithSingleChildNode {
-	private static int counter;
+public class ArrayItemNode extends WithSingleChildNode {
+	private IntegerProperty index = new SimpleIntegerProperty();
 
-	private StringProperty name = new SimpleStringProperty("name" + counter++);
-
-	public PropertyNode() {
+	public ArrayItemNode() {
 	}
 
-	public PropertyNode(String name) {
-		setName(name);
+	public ArrayItemNode(int indexValue) {
+		setIndex(indexValue);
 	}
 
     /*
      * Generate an error because these DBO are build by the parent of the property
      */
     @Override
-    public Object getDBOValue() {
-        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesQueryNode");
+    public Object getJsonElement() {
+        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesNode");
     }
 
-    public String getName() {
-        return name.get();
+    public int getIndex() {
+        return index.get();
     }
-    public void setName(String value) {
-        name.set(value);
+    public void setIndex(int value) {
+        index.set(value);
     }
-	public StringProperty nameProperty() {
-		return name;
+	public IntegerProperty indexProperty() {
+		return index;
 	}
 
     @Override
     public String toString() {
-        return name.get();
+        return "" + index.get();
     }
 }

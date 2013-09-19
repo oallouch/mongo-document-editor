@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.ui.module;
+package com.oallouch.mongodoc.tree;
 
 import com.google.common.collect.Maps;
 import com.oallouch.mongodoc.node.AbstractNode;
@@ -22,7 +22,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 
-public class QueryTreeCell extends TreeCell<AbstractNode> {
+public class DocumentTreeCell extends TreeCell<AbstractNode> {
 	private static final Map<Class<? extends AbstractNode>, StringConverter<? extends AbstractNode>> STRING_CONVERTERS = Maps.newHashMapWithExpectedSize(6);
 
 	private static final StringConverter<Operator> OPERATOR_STRING_CONVERTER = new StringConverter<Operator>() {
@@ -60,7 +60,7 @@ public class QueryTreeCell extends TreeCell<AbstractNode> {
 	private StringConverter currentStringConverter;
 	private ChangeListener focusListener;
 
-	public QueryTreeCell() {
+	public DocumentTreeCell() {
 		focusListener = new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {

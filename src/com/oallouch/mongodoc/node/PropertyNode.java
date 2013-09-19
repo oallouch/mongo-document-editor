@@ -26,8 +26,8 @@ public class PropertyNode extends WithSingleChildNode {
      * Generate an error because these DBO are build by the parent of the property
      */
     @Override
-    public Object getDBOValue() {
-        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesQueryNode");
+    public Object getJsonElement() {
+        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesNode");
     }
 
     public String getName() {

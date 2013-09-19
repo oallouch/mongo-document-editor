@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.ui.module;
+package com.oallouch.mongodoc.tree;
 
 import com.oallouch.mongodoc.node.AbstractNode;
 import com.oallouch.mongodoc.node.WithSingleChildNode;

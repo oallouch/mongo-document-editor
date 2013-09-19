@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.ui.module;
+package com.oallouch.mongodoc.tree;
 
 import com.google.common.collect.ImmutableMap;
 import com.oallouch.mongodoc.node.AbstractNode;
@@ -41,7 +41,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 			@Override public EqualsValueNode fromString(String string) { return null; }
 		}).build();
 
-	public static final StringConverter<Operator> OPERATOR_STRING_CONVERTER = new StringConverter<Operator>() {
+	/*public static final StringConverter<Operator> OPERATOR_STRING_CONVERTER = new StringConverter<Operator>() {
 		@Override public String toString(Operator operator) {
 			return operator.name(); // can't add semicolon here because it's used by the combo itself
 		}
@@ -49,11 +49,11 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 			name = removeEndingColon(name);
 			return Operator.valueOf(name);
 		}
-	};
+	};*/
 
 
 
-    private ComboBox<Operator> operatorComboBox;
+    //private ComboBox<Operator> operatorComboBox;
     private TextField textField;
 
 	private Node currentGraphic;
@@ -79,7 +79,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 		return treeItem == null ? null : treeItem.getValue();
 	}
 
-	protected ComboBox getOperatorComboBoxCreated() {
+	/*protected ComboBox getOperatorComboBoxCreated() {
 		if (operatorComboBox == null) {
 			// inspired by CellUtils.createComboBox
 			operatorComboBox = new ComboBox<>(OperatorNode.OPERATOR_LIST);
@@ -99,7 +99,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 			operatorComboBox.focusedProperty().addListener(focusListener);
 		}
 		return operatorComboBox;
-	}
+	}*/
 
 	protected TextField getTextField() {
 		if (textField == null) {
@@ -134,14 +134,14 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 		//-- editable ? --//
 		final AbstractNode node = getNode();
 		//-- graphic lazy init --//
-		if (node instanceof OperatorNode) {
+		/*if (node instanceof OperatorNode) {
 			OperatorNode operatorNode = (OperatorNode) node;
 			ComboBox comboBox = getOperatorComboBoxCreated();
 			comboBox.getSelectionModel().select(operatorNode.getOperator());
 			currentGraphic = comboBox;
-		} else {
+		} else {*/
 			currentGraphic = getTextField();
-		}
+		//}
 
         super.startEdit();
         setText(null);
@@ -202,7 +202,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
         //setEditable(node != null && !(node instanceof PropertiesNode) && !(node instanceof OperatorsNode));
 
         Node graphic = null;//treeItem.getGraphic();
-		if (node instanceof OperatorNode) {
+		/*if (node instanceof OperatorNode) {
 			OperatorNode operatorNode = (OperatorNode) node;
 			currentStringConverter = OPERATOR_STRING_CONVERTER;
             if (isEditing()) {
@@ -215,7 +215,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 				setText(ensureEndingColor(currentStringConverter.toString(operatorNode.getOperator())));
                 setGraphic(graphic);
             }
-		} else {
+		} else */{
 			currentStringConverter = STRING_CONVERTERS.get(node.getClass());
             if (isEditing()) {
                 if (textField != null) {
