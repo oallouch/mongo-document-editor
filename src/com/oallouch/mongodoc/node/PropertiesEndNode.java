@@ -14,41 +14,39 @@ import java.util.Map;
  * They can be indented each one so complexes query can
  * (hopefully) be built
  */
-public class PropertiesNode extends AbstractNode {
+public class ArrayNode extends AbstractNode {
 	private static final List<Class<? extends AbstractNode>> ACCEPTED_CHILDREN_TYPES = new ArrayList<>(1);
 
 	static {
-		ACCEPTED_CHILDREN_TYPES.add(PropertyNode.class);
+		ACCEPTED_CHILDREN_TYPES.add(ArrayItemNode.class);
 	}
 	
     /*
 	 * . convinience method
-     * . Appends a new property to the list
+     * . Appends a new array item to the list
      */
-    public PropertiesNode addProperty(String name, AbstractNode nodeChild) {
-        // TODO check object type for nodeChild?
-        PropertyNode propNode = new PropertyNode();
-        propNode.setName(name);
-        propNode.addChild(nodeChild);
-        addChild(propNode);
+    public ArrayNode addArrayItem(AbstractNode nodeChild) {
+        ArrayItemNode arrayNode = new ArrayItemNode();
+		arrayNode.setIndex(getChildCount());
+        arrayNode.addChild(nodeChild);
+        addChild(arrayNode);
         return this;
     }
 
     /*
-     * Chain the properties and their children to make a Map
+     * Chain the array and its children to make a List
      */
     @Override
     public Object getJsonElement() {
-		Map<String, Object> jsonObject = Maps.newHashMapWithExpectedSize(getChildCount());
+		List list = new ArrayList(getChildCount());
         for (AbstractNode child : getChildren()) {
-            PropertyNode prop = (PropertyNode) child;
-			if(prop.getChild(0) == null) {
-                prop.setError("A Property value can't be null");
+			if(child.getChild(0) == null) {
+                child.setError("A Array item value can't be null");
                 continue;
             }
-            jsonObject.put(prop.getName(), prop.getChild(0).getJsonElement());
+            list.add(child.getChild(0).getJsonElement());
         }
-        return jsonObject;
+        return list;
     }
 
 	@Override
@@ -58,6 +56,6 @@ public class PropertiesNode extends AbstractNode {
 
     @Override
     public String toString() {
-        return "Properties container (" + getChildCount() + ")";
+        return "Array container (" + getChildCount() + ")";
     }
 }
