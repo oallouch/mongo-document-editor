@@ -2,17 +2,11 @@ package com.oallouch.mongodoc;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.oallouch.mongodoc.node.NodeFactory;
-import com.oallouch.mongodoc.node.PropertiesNode;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.event.EventType;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.InputEvent;
@@ -24,7 +18,7 @@ public class JsonArea extends BorderPane {
 
 	private TextArea textArea;
 	private Label errorLabel;
-	private PropertiesNode rootNode;
+	private Map<String, Object> rootJsonObject;
 	private Gson gson;
 
 	public JsonArea() {
@@ -36,8 +30,7 @@ public class JsonArea extends BorderPane {
 			System.out.println("textArea updated");
 			String source = textArea.getText();
 			try {
-				Map<String, Object> rootAsMap = gson.fromJson(source, Map.class);
-				rootNode = NodeFactory.toNode(rootAsMap);
+				rootJsonObject = gson.fromJson(source, Map.class);
 				errorLabel.setText(null);
 				fireEvent(new InputEvent(MODIFIED));
 			} catch (JsonSyntaxException e) {
@@ -53,8 +46,8 @@ public class JsonArea extends BorderPane {
 	}
 
 
-	public PropertiesNode getRootNode() {
-		return this.rootNode;
+	public Map<String, Object> getRootJsonObject() {
+		return this.rootJsonObject;
 	}
 	public String getJsonText() {
 		return textArea.getText();

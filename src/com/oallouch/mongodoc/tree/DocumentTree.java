@@ -1,46 +1,37 @@
 package com.oallouch.mongodoc.tree;
 
 import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.PropertiesNode;
-import com.oallouch.mongodoc.node.WithSingleChildNode;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
+import java.util.Map;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.StackPane;
-import javafx.util.Callback;
 
 
 public class DocumentTree extends StackPane {
-    // Observer list
-    private ArrayList<DocumentTreeObserver> observers;
-    // edit form factory
-    //private QueryTreeEditorFactory factory;
-
-	private PropertiesNode rootNode;
 	private TreeTableView<AbstractNode> treeTable;
     private Menu cmiNodes;
     private MenuItem cmiRemove;
     
     public DocumentTree() {
-        observers = new ArrayList<>();
         // Set the tree view not resizable when container grow up
         //SplitPane.setResizableWithParent(bpLeft, Boolean.FALSE);
 
 		treeTable = new TreeTableView<>();
-		TreeTableColumn<AbstractNode, Object> nameCol = new TreeTableColumn<>("Name");
-		nameCol.setCellFactory((TreeTableColumn<AbstractNode, Object> treeTableColumn) -> new DocumentTreeTableCell());
+		TreeTableColumn<AbstractNode, AbstractNode> nameCol = new TreeTableColumn<>("Name");
+		nameCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		nameCol.setCellFactory(treeTableColumn -> new TreeColumnCell());
 
-		TreeTableColumn<AbstractNode, Object> valueCol = new TreeTableColumn<>("Value");
-		valueCol.setCellFactory((TreeTableColumn<AbstractNode, Object> treeTableColumn) -> new SecondColumnTreeTableCell());
+		TreeTableColumn<AbstractNode, AbstractNode> valueCol = new TreeTableColumn<>("Value");
+		valueCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		valueCol.setCellFactory(treeTableColumn -> new SecondColumnTreeTableCell());
 
 		treeTable.getColumns().setAll(nameCol, valueCol);
 		//treeTable.setTreeColumn(nameCol);
@@ -52,6 +43,7 @@ public class DocumentTree extends StackPane {
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
 
 		this.getChildren().add(treeTable);
+		
         /*
          * Set the tvTreeView selection handler so it will show an edit form
          * when selecting a node is focused/selected
@@ -77,53 +69,26 @@ public class DocumentTree extends StackPane {
             }
         });*/
 
-        resetQuery();
+        //reset();
     }
     
-    /*
-     * Reset the query (just set a new root element to the treeview)
-     */
-    @FXML
-    public void resetQuery() {
-        setRootNode(new PropertiesNode());
+    public void reset() {
+        setRootJsonObject(new HashMap<>());
     }
 
-	public PropertiesNode getRootNode() {
-		return rootNode;
+	public Map<String, Object> getRootJsonObject() {
+		return (Map<String, Object>) TreeItemFactory.toJsonObject(treeTable.getRoot());
 	}
-	public void setRootNode(PropertiesNode rootNode) {
-		this.rootNode = rootNode;
-        TreeItem<AbstractNode> newRoot = createTreeItem(rootNode);
-        treeTable.setRoot(newRoot);
-        treeTable.getSelectionModel().select(newRoot);
-        updateObservers();
-
-		//treeTable.edit(1, treeTable.getTreeColumn());
+	public void setRootJsonObject(Map<String, Object> jsonObject) {
+		treeTable.setRoot(TreeItemFactory.createRootTreeItem(jsonObject));
+		expandAll(treeTable.getRoot());
 	}
-
-	/** recursive */
-	private TreeItem<AbstractNode> createTreeItem(AbstractNode node) {
-		//-- the node itself --//
-		TreeItem<AbstractNode> treeItem = new TreeItem<>(node);
-		treeItem.setExpanded(true);
-
-		if (node instanceof WithSingleChildNode) {
-			//-- we skip the value because it's in the second column --//
-			//-- (see SecondColumnTreeTableCell) --//
-			AbstractNode valueNode = node.getChild(0);
-			// we add the valueNode children to the valueNode's parent's TreeItem
-			if (valueNode != null) {
-				for (AbstractNode child : valueNode.getChildren()) {
-					treeItem.getChildren().add(createTreeItem(child));
-				}
-			}
-		} else {
-			//-- children --//
-			for (AbstractNode child : node.getChildren()) {
-				treeItem.getChildren().add(createTreeItem(child));
-			}
+	
+	private void expandAll(TreeItem<?> item) {
+		item.setExpanded(true);
+		for (TreeItem<? extends Object> childItem : item.getChildren()) {
+			expandAll(childItem);
 		}
-		return treeItem;
 	}
     
     /*
@@ -145,30 +110,27 @@ public class DocumentTree extends StackPane {
             List<MenuItem> items = cmiNodes.getItems();
             items.clear();
             final AbstractNode selectedNode = selected.getValue();
-            for (Class<? extends AbstractNode> clazz : selectedNode.getAcceptedChildrenTypes()) {
+            /*for (Class<? extends AbstractNode> clazz : selectedNode.getAcceptedChildrenTypes()) {
                 MenuItem menuItem = new MenuItem(clazz.getSimpleName());
                 menuItem.setUserData(clazz);
-                menuItem.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent e) {
-                        MenuItem menuItem = (MenuItem) e.getSource();
-                        Class<? extends AbstractNode> nodeClass = (Class) menuItem.getUserData();
-                        AbstractNode node;
-                        try {
-                            node = nodeClass.newInstance();
-                        } catch (IllegalAccessException | InstantiationException ex) {
-                            // should never happens
-                            throw new RuntimeException(ex);
-                        }
-                        selectedNode.addChild(node);
-                        TreeItem<AbstractNode> newTreeItem = new TreeItem<>(node);
-                        selected.getChildren().add(newTreeItem);
-                        selected.setExpanded(true);
-                        sModel.select(newTreeItem);
-                    }
-                });
+                menuItem.setOnAction(e -> {
+					MenuItem menuItem1 = (MenuItem) e.getSource();
+					Class<? extends AbstractNode> nodeClass = (Class) menuItem1.getUserData();
+					AbstractNode node;
+					try {
+						node = nodeClass.newInstance();
+					} catch (IllegalAccessException | InstantiationException ex) {
+						// should never happens
+						throw new RuntimeException(ex);
+					}
+					selectedNode.addChild(node);
+					TreeItem<AbstractNode> newTreeItem = new TreeItem<>(node);
+					selected.getChildren().add(newTreeItem);
+					selected.setExpanded(true);
+					sModel.select(newTreeItem);
+				});
                 items.add(menuItem);
-            }
+            }*/
             // avoid root deletion and disable the nodes menu if needed
             cmiNodes.setDisable(items.isEmpty());
             cmiRemove.setDisable(selected.getParent() == null);
@@ -184,24 +146,9 @@ public class DocumentTree extends StackPane {
         TreeItem<AbstractNode> selected = sModel.getSelectedItem();
         
         // Remove also the node from the AbstractNode parent and select root node again
-        AbstractNode parent = selected.getValue().getParent();
-        parent.removeChild(selected.getValue());
+        //AbstractNode parent = selected.getValue().getParent();
+        //parent.removeChild(selected.getValue());
         selected.getParent().getChildren().remove(selected);
         sModel.selectPrevious();
-    }
-    
-    public void addObserver(DocumentTreeObserver observer) {
-        observers.add(observer);
-        updateObservers();
-    }
-    
-    public void removeObserver(DocumentTreeObserver observer) {
-        observers.remove(observer);
-    }
-    
-    private void updateObservers() {
-        for(DocumentTreeObserver ob : observers) {
-            ob.updateQuery(treeTable.getRoot().getValue());
-        }
     }
 }

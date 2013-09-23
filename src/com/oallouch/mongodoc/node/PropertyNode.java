@@ -10,25 +10,15 @@ import javafx.beans.property.StringProperty;
  * 
  * This is managed by the PropertiesNode class.
  */
-public class PropertyNode extends WithSingleChildNode {
+public class PropertyNode extends WithValueNode {
 	private static int counter;
 
 	private StringProperty name = new SimpleStringProperty("name" + counter++);
 
-	public PropertyNode() {
-	}
-
-	public PropertyNode(String name) {
+	public PropertyNode(String name, Object value) {
+		super(value);
 		setName(name);
 	}
-
-    /*
-     * Generate an error because these DBO are build by the parent of the property
-     */
-    @Override
-    public Object getJsonElement() {
-        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesNode");
-    }
 
     public String getName() {
         return name.get();

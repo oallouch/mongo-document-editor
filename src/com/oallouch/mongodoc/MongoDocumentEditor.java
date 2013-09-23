@@ -1,6 +1,5 @@
 package com.oallouch.mongodoc;
 
-import com.oallouch.mongodoc.tree.DocumentTree;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;

@@ -1,9 +1,7 @@
 package com.oallouch.mongodoc;
 
-import com.oallouch.mongodoc.tree.DocumentTree;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -37,7 +35,7 @@ public class MongoDocumentEditorFX extends Application {
 		StackPane root = new StackPane();
 		root.getChildren().add(documentEditor);
 
-		Scene scene = new Scene(root, 300, 250);
+		Scene scene = new Scene(root, 700, 500);
 
 		primaryStage.setTitle("Mongo Document Editor");
 		primaryStage.setScene(scene);

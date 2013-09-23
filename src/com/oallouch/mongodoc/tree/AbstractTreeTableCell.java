@@ -2,29 +2,21 @@ package com.oallouch.mongodoc.tree;
 
 import com.google.common.collect.ImmutableMap;
 import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.OperatorNode;
-import com.oallouch.mongodoc.node.OperatorNode.Operator;
-import com.oallouch.mongodoc.node.PropertiesNode;
 import com.oallouch.mongodoc.node.PropertyNode;
-import com.oallouch.mongodoc.node.EqualsValueNode;
-import com.oallouch.mongodoc.node.WithSingleChildNode;
+import com.oallouch.mongodoc.node.WithValueNode;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 
 public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 	private static final ImmutableMap<Class<? extends AbstractNode>, StringConverter<? extends AbstractNode>> STRING_CONVERTERS = ImmutableMap.<Class<? extends AbstractNode>, StringConverter<? extends AbstractNode>>builder()
 		//-- PropertiesNode --//
-		.put(PropertiesNode.class, new StringConverter<PropertiesNode>() {
+		/*.put(PropertiesNode.class, new StringConverter<PropertiesNode>() {
 			@Override public String toString(PropertiesNode node) { return "{"; }
 			@Override public PropertiesNode fromString(String string) { return null; }
 		})
@@ -33,13 +25,23 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 			@Override public String toString(PropertyNode node) { return node.getName(); }
 			@Override public PropertyNode fromString(String string) { return null; }
 		})
-		//-- EqualsValueNode --//
-		.put(EqualsValueNode.class, new StringConverter<EqualsValueNode>() {
-			@Override public String toString(EqualsValueNode node) {
+		//-- PropertiesNode --//
+		.put(ArrayNode.class, new StringConverter<ArrayNode>() {
+			@Override public String toString(ArrayNode node) { return "["; }
+			@Override public ArrayNode fromString(String string) { return null; }
+		})
+		//-- PropertiesNode --//
+		.put(ArrayElementNode.class, new StringConverter<ArrayElementNode>() {
+			@Override public String toString(ArrayElementNode node) { return Integer.toString(node.getIndex()); }
+			@Override public ArrayElementNode fromString(String string) { return null; }
+		})
+		//-- PrimitiveValueNode --//
+		.put(PrimitiveValueNode.class, new StringConverter<PrimitiveValueNode>() {
+			@Override public String toString(PrimitiveValueNode node) {
 				return node == null ? null : node.getEditingString();
 			}
-			@Override public EqualsValueNode fromString(String string) { return null; }
-		}).build();
+			@Override public PrimitiveValueNode fromString(String string) { return null; }
+		})*/.build();
 
 	/*public static final StringConverter<Operator> OPERATOR_STRING_CONVERTER = new StringConverter<Operator>() {
 		@Override public String toString(Operator operator) {
@@ -75,7 +77,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 	}
 
 	protected AbstractNode getNode() {
-		TreeItem<AbstractNode> treeItem = getTreeTableView().getTreeItem(getIndex());
+		TreeItem<AbstractNode> treeItem = (TreeItem<AbstractNode>) getItem();
 		return treeItem == null ? null : treeItem.getValue();
 	}
 
@@ -106,21 +108,19 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 			// inspired by CellUtils.createTextField
 			System.out.println("getTextField, hashcode" + this.hashCode());
 			textField = new TextField(currentStringConverter.toString(getNode()));
-			textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
-				@Override public void handle(KeyEvent t) {
-					if (t.getCode() == KeyCode.ENTER) {
-						String text = textField.getText();
-						AbstractNode node = getNode();
-						if (node instanceof EqualsValueNode) {
-							((EqualsValueNode) node).setEditingString(text);
-						} else {
-							text = removeEndingColon(text); // in case the user enters ":" or " :" at the end
-							((PropertyNode) node).setName(text);
-						}
-						cancelEdit();
-					} else if (t.getCode() == KeyCode.ESCAPE) {
-						cancelEdit();
-					}
+			textField.setOnKeyReleased(t -> {
+				if (t.getCode() == KeyCode.ENTER) {
+					String text = textField.getText();
+					AbstractNode node = getNode();
+					/*if (node instanceof PrimitiveValueNode) {
+						((PrimitiveValueNode) node).setEditingString(text);
+					} else {*/
+						text = removeEndingColon(text); // in case the user enters ":" or " :" at the end
+						((PropertyNode) node).setName(text);
+					//}
+					cancelEdit();
+				} else if (t.getCode() == KeyCode.ESCAPE) {
+					cancelEdit();
 				}
 			});
 			textField.focusedProperty().addListener(focusListener);
@@ -131,25 +131,15 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 	@Override
     public void startEdit() {
 		System.out.println("start edit");
+        super.startEdit();
 		//-- editable ? --//
 		final AbstractNode node = getNode();
-		//-- graphic lazy init --//
-		/*if (node instanceof OperatorNode) {
-			OperatorNode operatorNode = (OperatorNode) node;
-			ComboBox comboBox = getOperatorComboBoxCreated();
-			comboBox.getSelectionModel().select(operatorNode.getOperator());
-			currentGraphic = comboBox;
-		} else {*/
-			currentGraphic = getTextField();
-		//}
+		//-- textField lazy init --//
+		currentGraphic = getTextField();
 
-        super.startEdit();
         setText(null);
         setGraphic(currentGraphic);
 		if (currentGraphic != null) {
-			if (currentGraphic instanceof ComboBox) {
-				((ComboBox) currentGraphic).show();
-			}
 			currentGraphic.requestFocus();
 		}
     }
@@ -215,7 +205,7 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 				setText(ensureEndingColor(currentStringConverter.toString(operatorNode.getOperator())));
                 setGraphic(graphic);
             }
-		} else */{
+		} else {*/
 			currentStringConverter = STRING_CONVERTERS.get(node.getClass());
             if (isEditing()) {
                 if (textField != null) {
@@ -225,13 +215,13 @@ public class AbstractTreeTableCell extends TreeTableCell<AbstractNode, Object> {
 				setGraphic(textField);
             } else {
 				String text = currentStringConverter.toString(node);
-				if (node instanceof WithSingleChildNode) {
+				if (node instanceof WithValueNode) {
 					text = ensureEndingColor(text);
 				}
 				setText(text);
                 setGraphic(graphic);
             }
-		}
+		//}
 
         /*TreeItem<AbstractNode> treeItem = getTreeItem();
         Node graphic = treeItem == null ? null : treeItem.getGraphic();

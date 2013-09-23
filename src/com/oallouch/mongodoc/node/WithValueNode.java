@@ -1,40 +1,41 @@
 package com.oallouch.mongodoc.node;
 
-import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import java.util.Map;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
-/**
- * represents a JSON map value with a single child (the value)
- */
-public abstract class WithSingleChildNode extends AbstractNode {
-	private static final List<Class<? extends AbstractNode>> ACCEPTED_CHILDREN_TYPES = new ArrayList<>(1);
+public abstract class WithValueNode extends AbstractNode {
+	public static enum SpecialValue { properties, array };
+	
+	private ObjectProperty value = new SimpleObjectProperty();
 
-	static {
-		ACCEPTED_CHILDREN_TYPES.add(EqualsValueNode.class);
-		ACCEPTED_CHILDREN_TYPES.add(PropertiesNode.class);
+	public WithValueNode(Object value) {
+		setValue(value);
 	}
-
-	@Override
-	public AbstractNode addChild(AbstractNode child) {
-		super.addChild(child);
-		if (getChildCount() > 1) {
-			setError("A property node can only have 1 child");
+	
+	public boolean isValueProperties() {
+		return value.get() == SpecialValue.properties;
+	}
+	public boolean isValueArray() {
+		return value.get() == SpecialValue.array;
+	}
+	public boolean isValuePrimitive() {
+		return !(value.get() instanceof SpecialValue);
+	}
+	
+	public Object getValue() {
+		return value.get();
+	}
+	public void setValue(Object valueArg) {
+		Object valueOrEnum;
+		if (valueArg instanceof Map) {
+			valueOrEnum = SpecialValue.properties;
+		} else if (valueArg instanceof List) {
+			valueOrEnum = SpecialValue.array;
+		} else { // primitive type
+			valueOrEnum = valueArg;
 		}
-		return this;
-	}
-
-    /*
-     * Generate an error because these DBO are build by the parent of the property
-     */
-    @Override
-    public Object getJsonElement() {
-        throw new IllegalArgumentException("getDBO can't be called directly. The DBO is built by PropertiesQueryNode");
-    }
-
-	@Override
-	public List<Class<? extends AbstractNode>> getAcceptedChildrenTypes() {
-		return ACCEPTED_CHILDREN_TYPES;
+		this.value.set(valueOrEnum);
 	}
 }
