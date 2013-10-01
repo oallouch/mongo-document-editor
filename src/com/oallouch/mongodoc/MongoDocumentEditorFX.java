@@ -16,6 +16,7 @@ public class MongoDocumentEditorFX extends Application {
 			"  \"menu\": \"Fichier\",\n" +
 			"  \"commandes\": [\n" +
 			"      {\n" +
+			"          \"numero\": 1,\n" +
 			"          \"title\": \"Nouveau\",\n" +
 			"          \"action\":\"CreateDoc\"\n" +
 			"      },\n" +

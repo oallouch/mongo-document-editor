@@ -27,14 +27,17 @@ public class DocumentTree extends StackPane {
 		treeTable = new TreeTableView<>();
 		TreeTableColumn<AbstractNode, AbstractNode> nameCol = new TreeTableColumn<>("Name");
 		nameCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
-		nameCol.setCellFactory(treeTableColumn -> new TreeColumnCell());
+		nameCol.setCellFactory(treeTableColumn -> new NameColumnCell());
 
 		TreeTableColumn<AbstractNode, AbstractNode> valueCol = new TreeTableColumn<>("Value");
 		valueCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
-		valueCol.setCellFactory(treeTableColumn -> new SecondColumnTreeTableCell());
+		valueCol.setCellFactory(treeTableColumn -> new ValueColumnCell());
 
-		treeTable.getColumns().setAll(nameCol, valueCol);
-		//treeTable.setTreeColumn(nameCol);
+		TreeTableColumn<AbstractNode, AbstractNode> typeCol = new TreeTableColumn<>("Type");
+		typeCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		typeCol.setCellFactory(treeTableColumn -> new TypeColumnCell());
+
+		treeTable.getColumns().setAll(nameCol, valueCol, typeCol);
 
 		treeTable.setEditable(true);
 

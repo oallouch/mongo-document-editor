@@ -10,13 +10,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.KeyCode;
 
-public class TreeColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
+public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 	
 	private TextField textField;
 
 	@Override
 	protected void updateItem(AbstractNode node, boolean empty) {
-		System.out.println("updateItem, value: " + node);
         setEditable(node instanceof PropertyNode);
         super.updateItem(node, empty);
 		
@@ -27,21 +26,6 @@ public class TreeColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 			return;
 		}
 
-        //Node graphic = null; // treeItem.getGraphic();
-		/*if (node instanceof OperatorNode) {
-			OperatorNode operatorNode = (OperatorNode) node;
-			currentStringConverter = OPERATOR_STRING_CONVERTER;
-            if (isEditing()) {
-				if (operatorComboBox != null) {
-					operatorComboBox.getSelectionModel().select(operatorNode.getOperator());
-				}
-				setText(null);
-				setGraphic(operatorComboBox);
-            } else {
-				setText(ensureEndingColor(currentStringConverter.toString(operatorNode.getOperator())));
-                setGraphic(graphic);
-            }
-		} else {*/
 		if (isEditing()) {
 			if (textField != null) {
 				textField.setText(node.toString());
@@ -49,11 +33,7 @@ public class TreeColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 			setText(null);
 			setGraphic(textField);
 		} else {
-			/*if (node instanceof WithValueNode) {
-				text = ensureEndingColor(text);
-			}*/
 			String text = getReadValue(node);
-			System.out.println("text: " + text);
 			setText(text);
 			setGraphic(null);
 		}
@@ -93,18 +73,19 @@ public class TreeColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		//-- graphic lazy init --//
 		if (textField == null) {
 			// inspired by CellUtils.createTextField
-			textField = new TextField(node.toString());
+			textField = new TextField();
 			textField.setOnKeyReleased(t -> {
 				if (t.getCode() == KeyCode.ESCAPE) {
 					String text = ((PropertyNode) node).getName();
 					textField.setText(text);
 					cancelEdit();
-				} else if (t.getCode() == KeyCode.ESCAPE) {
+				} else if (t.getCode() == KeyCode.ENTER) {
 					cancelEdit();
 				}
 			});
 			//textField.focusedProperty().addListener(focusListener);
 		}
+		textField.setText(node.toString());
 
         super.startEdit();
         setText(null);
@@ -123,9 +104,4 @@ public class TreeColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		setText(getReadValue(node));
         setGraphic(null);
     }
-	
-	public static String toReadText(PropertyNode propertyNode) {
-		return propertyNode.getName();
-	}
-	
 }
