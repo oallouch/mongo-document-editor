@@ -1,18 +1,28 @@
 package com.oallouch.mongodoc.tree;
 
+import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.node.AbstractNode;
 import com.oallouch.mongodoc.node.ArrayElementNode;
+import com.oallouch.mongodoc.node.ArrayEndNode;
+import com.oallouch.mongodoc.node.PropertiesEndNode;
 import com.oallouch.mongodoc.node.PropertyNode;
 import com.oallouch.mongodoc.node.RootNode;
 import com.oallouch.mongodoc.node.WithValueNode;
 import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
-import javafx.scene.control.TextField;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TreeTableCell;
+import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 
 public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
-	
-	private TextField textField;
+	private static ObservableList<String> QUERY_OPERATORS = FXCollections.observableArrayList(
+		"$gt", "$gte", "$in", "$lt", "$lte", "$ne", "$nin"
+	);
+	private ComboBox combo;
 
 	@Override
 	protected void updateItem(AbstractNode node, boolean empty) {
@@ -27,11 +37,11 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		}
 
 		if (isEditing()) {
-			if (textField != null) {
-				textField.setText(node.toString());
+			if (combo != null) {
+				combo.setValue(node.toString());
 			}
 			setText(null);
-			setGraphic(textField);
+			setGraphic(combo);
 		} else {
 			String text = getReadValue(node);
 			setText(text);
@@ -49,6 +59,10 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 			text = Integer.toString(arrayElementNode.getIndex());
 		} else if (node instanceof RootNode) {
 			text = "{";
+		} else if (node instanceof PropertiesEndNode) {
+			text = "}";
+		} else if (node instanceof ArrayEndNode) {
+			text = "]";
 		}
 		if (node instanceof WithValueNode) {
 			text += " :";
@@ -71,37 +85,47 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		//-- editable ? --//
 		final AbstractNode node = getItem();
 		//-- graphic lazy init --//
-		if (textField == null) {
-			// inspired by CellUtils.createTextField
-			textField = new TextField();
-			textField.setOnKeyReleased(t -> {
+		if (combo == null) {
+			// inspired by CellUtils
+			combo = new ComboBox();
+			combo.setItems(QUERY_OPERATORS);
+			combo.setEditable(true);
+			combo.setOnKeyReleased(t -> {
 				if (t.getCode() == KeyCode.ESCAPE) {
 					String text = ((PropertyNode) node).getName();
-					textField.setText(text);
+					combo.setValue(text);
 					cancelEdit();
 				} else if (t.getCode() == KeyCode.ENTER) {
 					cancelEdit();
 				}
 			});
+			combo.setOnAction(t -> cancelEdit());
 			//textField.focusedProperty().addListener(focusListener);
 		}
-		textField.setText(node.toString());
+		combo.setValue(node.toString());
 
         super.startEdit();
         setText(null);
-        setGraphic(textField);
-		textField.requestFocus();
+        setGraphic(combo);
+		combo.requestFocus();
     }
 
+	/**
+	 * acts as a cancel, put also as a commmit method
+	 */
 	@Override
 	public void cancelEdit() {
         super.cancelEdit();
 
-		AbstractNode node = getItem();
-		String text = textField.getText();
-		((PropertyNode) node).setName(text);
+		PropertyNode propertyNode = (PropertyNode) getItem();
 		
-		setText(getReadValue(node));
+		String newName = (String) combo.getValue();
+		if (!newName.equals(propertyNode.getName())) {
+			propertyNode.setName(newName);
+			fireEvent(new InputEvent(DocumentEditor.MODIFIED));
+		}
+		
+		setText(getReadValue(propertyNode));
         setGraphic(null);
     }
 }

@@ -36,7 +36,7 @@ public class MongoDocumentEditorFX extends Application {
 		StackPane root = new StackPane();
 		root.getChildren().add(documentEditor);
 
-		Scene scene = new Scene(root, 700, 500);
+		Scene scene = new Scene(root, 1000, 500);
 
 		primaryStage.setTitle("Mongo Document Editor");
 		primaryStage.setScene(scene);

@@ -1,22 +1,25 @@
 package com.oallouch.mongodoc.tree;
 
+import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
 import com.oallouch.mongodoc.node.AbstractNode;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.InputEvent;
 import javafx.scene.layout.StackPane;
 
 
 public class DocumentTree extends StackPane {
 	private TreeTableView<AbstractNode> treeTable;
+	private TreeItem hiddenRootItem;
     private Menu cmiNodes;
     private MenuItem cmiRemove;
     
@@ -28,23 +31,36 @@ public class DocumentTree extends StackPane {
 		TreeTableColumn<AbstractNode, AbstractNode> nameCol = new TreeTableColumn<>("Name");
 		nameCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
 		nameCol.setCellFactory(treeTableColumn -> new NameColumnCell());
+		nameCol.setSortable(false);
+		nameCol.addEventHandler(MODIFIED, e -> fireModified());
 
 		TreeTableColumn<AbstractNode, AbstractNode> valueCol = new TreeTableColumn<>("Value");
 		valueCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
 		valueCol.setCellFactory(treeTableColumn -> new ValueColumnCell());
+		valueCol.setSortable(false);
+		valueCol.addEventHandler(MODIFIED, e -> fireModified());
 
 		TreeTableColumn<AbstractNode, AbstractNode> typeCol = new TreeTableColumn<>("Type");
 		typeCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
 		typeCol.setCellFactory(treeTableColumn -> new TypeColumnCell());
+		typeCol.setSortable(false);
+		typeCol.addEventHandler(MODIFIED, e -> fireModified());
+		typeCol.setMinWidth(130);
+		typeCol.setMaxWidth(130);
 
 		treeTable.getColumns().setAll(nameCol, valueCol, typeCol);
+		treeTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
 
 		treeTable.setEditable(true);
 
 		// . treeTable mustn't be in row selection mode
 		// . found in TreeTableCellBehavior.simpleSelect(MouseEvent e) (7th line of the method)
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
-
+		
+		hiddenRootItem = new TreeItem();
+		treeTable.setRoot(hiddenRootItem);
+		treeTable.setShowRoot(false);
+		
 		this.getChildren().add(treeTable);
 		
         /*
@@ -80,11 +96,19 @@ public class DocumentTree extends StackPane {
     }
 
 	public Map<String, Object> getRootJsonObject() {
-		return (Map<String, Object>) TreeItemFactory.toJsonObject(treeTable.getRoot());
+		if (hiddenRootItem.getChildren().isEmpty()) {
+			return Collections.emptyMap();
+		}
+		return (Map<String, Object>) TreeItemFactory.toJsonObject((TreeItem) hiddenRootItem.getChildren().get(0));
 	}
 	public void setRootJsonObject(Map<String, Object> jsonObject) {
-		treeTable.setRoot(TreeItemFactory.createRootTreeItem(jsonObject));
+		hiddenRootItem.getChildren().clear();
+		TreeItemFactory.createRootTreeItem(jsonObject, hiddenRootItem);
 		expandAll(treeTable.getRoot());
+	}
+	
+	private void fireModified() {
+		fireEvent(new InputEvent(MODIFIED));
 	}
 	
 	private void expandAll(TreeItem<?> item) {
