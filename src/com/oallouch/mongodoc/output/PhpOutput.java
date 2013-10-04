@@ -1,9 +1,9 @@
 package com.oallouch.mongodoc.output;
 
-public class JavaOutput extends AbstractOutput {
+public class PhpOutput extends AbstractOutput {
 	@Override
 	protected String getObjectPrefix() {
-		return "new DBO(";
+		return "array(";
 	}
 	@Override
 	protected String getObjectSuffix() {
@@ -12,11 +12,11 @@ public class JavaOutput extends AbstractOutput {
 
 	@Override
 	protected String getNameValueSeparator() {
-		return ", ";
+		return " => ";
 	}
 	@Override
 	protected String getArrayPrefix() {
-		return "new DBL(";
+		return "array(";
 	}
 	@Override
 	protected String getArraySuffix() {
@@ -24,6 +24,6 @@ public class JavaOutput extends AbstractOutput {
 	}
 	@Override
 	protected String getQuote() {
-		return "\"";
+		return "'";
 	}
 }

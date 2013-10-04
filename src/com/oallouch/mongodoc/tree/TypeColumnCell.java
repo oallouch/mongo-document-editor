@@ -12,19 +12,25 @@ public class TypeColumnCell extends AbstractValueColumnCell {
 
 	@Override
 	protected void updateItem(Object value, DataType dataType) {
-
         setEditable(true);
 
 		if (isEditing()) {
-			if (combo != null) {
-				combo.setValue(dataType);
-			}
+			getComboBox().setValue(dataType);
 			setText(null);
-			setGraphic(combo);
+			setGraphic(getComboBox());
 		} else {
-			setText(dataType != null ? dataType.getText() : null);
+			setText(dataType.getText());
 			setGraphic(null);
 		}
+	}
+	
+	private ComboBox<DataType> getComboBox() {
+		if (combo == null) {
+			ObservableList<DataType> dataTypeList = FXCollections.observableArrayList(Arrays.asList(DataType.values()));
+			combo = new ComboBox<>(dataTypeList);
+			combo.setOnAction(t -> cancelEdit());
+		}
+		return combo;
 	}
 	
 	@Override
@@ -32,27 +38,24 @@ public class TypeColumnCell extends AbstractValueColumnCell {
 		if (!isEditable()) {
 			return;
 		}
-		if (combo == null) {
-			ObservableList<DataType> dataTypeList = FXCollections.observableArrayList(Arrays.asList(DataType.values()));
-			combo = new ComboBox<>(dataTypeList);
-		}
-		combo.getSelectionModel().select(getDataType());
-		combo.setOnAction(t -> cancelEdit());
 
+		getComboBox().getSelectionModel().select(getDataType());
+		
         super.startEdit();
         setText(null);
-        setGraphic(combo);
-		combo.requestFocus();
-		combo.show();
+        setGraphic(getComboBox());
+		getComboBox().requestFocus();
+		getComboBox().show();
     }
 
 	@Override
 	public void cancelEdit() {
         super.cancelEdit();
 		
-		DataType newDataType = combo.getValue();
+		DataType newDataType = getComboBox().getValue();
 		if (newDataType != getDataType()) {
-			setValue(newDataType.toValueOfType(getItem()));
+			Object newValue = newDataType.toValueOfType(getItem());
+			setValue(newValue);
 			// "value" is a Property, so the value cell repaints itself
 			fireEvent(new InputEvent(DocumentEditor.MODIFIED));
 			

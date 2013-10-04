@@ -23,6 +23,7 @@ public class DocumentEditor extends SplitPane {
 
 		outputPane = new OutputPane();
 		outputPane.addEventHandler(MODIFIED, e -> {
+			System.out.println("outputPane MODIFIED");
 			documentTree.setRootJsonObject(outputPane.getRootJsonObject());
 		});
 		

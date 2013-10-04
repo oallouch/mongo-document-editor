@@ -9,23 +9,33 @@ import javafx.scene.input.InputEvent;
 public class OutputPane extends TabPane {
 	private JsonArea jsonArea;
 	private JavaOutput javaOutput;
+	private PhpOutput phpOutput;
 	private boolean tempEventBlocking;
 	
 	public OutputPane() {
+		//---------------- Json -----------------//
 		Tab jsonTab = new Tab("Json");
 		jsonTab.setClosable(false);
 		jsonTab.setContent(jsonArea = new JsonArea());
 		jsonArea.addEventHandler(MODIFIED, e -> {
+			e.consume(); // or it would also be seen as an OutputPane event
 			if (!tempEventBlocking) {
+				System.out.println("JsonArea MODIFIED");
 				fireEvent(new InputEvent(MODIFIED));
 			}
 		});
 		
+		//---------------- Java -----------------//
 		Tab javaTab = new Tab("Java r/o");
 		javaTab.setClosable(false);
 		javaTab.setContent(javaOutput = new JavaOutput());
 		
-		getTabs().setAll(jsonTab, javaTab);
+		//---------------- PHP -----------------//
+		Tab phpTab = new Tab("PHP r/o");
+		phpTab.setClosable(false);
+		phpTab.setContent(phpOutput = new PhpOutput());
+		
+		getTabs().setAll(jsonTab, javaTab, phpTab);
 	}
 	
 	public Map<String, Object> getRootJsonObject() {
@@ -35,7 +45,9 @@ public class OutputPane extends TabPane {
 		tempEventBlocking = true;
 		try {
 			jsonArea.setRootJsonObject(jsonObject);
-			javaOutput.setRootJsonObject(jsonObject); // very fast, no need to see if it's visible or not
+			// very fast, no need to see if it's visible or not
+			javaOutput.setRootJsonObject(jsonObject);
+			phpOutput.setRootJsonObject(jsonObject);
 		} finally {
 			tempEventBlocking = false;
 		}
@@ -47,7 +59,9 @@ public class OutputPane extends TabPane {
 		tempEventBlocking = true;
 		try {
 			jsonArea.setJsonText(jsonText);
-			javaOutput.setRootJsonObject(jsonArea.getRootJsonObject());
+			Map<String, Object> rootJsonObject = jsonArea.getRootJsonObject();
+			javaOutput.setRootJsonObject(rootJsonObject);
+			phpOutput.setRootJsonObject(rootJsonObject);
 		} finally {
 			tempEventBlocking = false;
 		}

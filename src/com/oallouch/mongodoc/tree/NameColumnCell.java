@@ -83,7 +83,6 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		if (!isEditable()) {
 			return;
 		}
-		//-- editable ? --//
 		final AbstractNode node = getItem();
 		//-- graphic lazy init --//
 		if (combo == null) {
@@ -101,7 +100,6 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 				}
 			});
 			combo.setOnAction(t -> cancelEdit());
-			//textField.focusedProperty().addListener(focusListener);
 		}
 		combo.setValue(node.toString());
 

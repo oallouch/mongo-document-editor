@@ -50,46 +50,17 @@ public class DocumentTree extends StackPane {
 		typeCol.setMaxWidth(130);
 
 		treeTable.getColumns().setAll(nameCol, valueCol, typeCol);
+		
 		treeTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
-
 		treeTable.setEditable(true);
-
-		// . treeTable mustn't be in row selection mode
-		// . found in TreeTableCellBehavior.simpleSelect(MouseEvent e) (7th line of the method)
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
+		
 		
 		hiddenRootItem = new TreeItem();
 		treeTable.setRoot(hiddenRootItem);
 		treeTable.setShowRoot(false);
 		
 		this.getChildren().add(treeTable);
-		
-        /*
-         * Set the tvTreeView selection handler so it will show an edit form
-         * when selecting a node is focused/selected
-         */
-        /*FocusModel<TreeItem<AbstractNode>> fModel = tvQuery.getFocusModel();
-        fModel.focusedItemProperty().addListener(new ChangeListener<TreeItem<AbstractNode>>() {
-            @Override
-            public void changed(ObservableValue<? extends TreeItem<AbstractNode>> ov, TreeItem<AbstractNode> t, TreeItem<AbstractNode> t1) {
-                if(t1 == null) return;
-                /*
-                 * . Ask the factory for the right panel editor
-                 * . Add it to the right borderpane
-                 */
-
-                /*AbstractNode edited = t1.getValue();
-                if(edited instanceof PropertyNode) {
-                    bpRight.setCenter(factory.getPropertyEditor(t1));
-                } else if (edited instanceof OperatorNode) {
-                    bpRight.setCenter(factory.getOperatorEditor(t1));
-                } else {
-                    bpRight.setCenter(null);
-                }
-            }
-        });*/
-
-        //reset();
     }
     
     public void reset() {

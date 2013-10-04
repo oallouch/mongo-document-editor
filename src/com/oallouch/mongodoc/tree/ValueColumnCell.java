@@ -26,7 +26,6 @@ public class ValueColumnCell extends AbstractValueColumnCell {
 	
 	@Override
 	protected void updateItem(Object value, DataType dataType) {
-		
         setEditable(dataType != DataType.NULL);
 
 		String text = null;
@@ -78,7 +77,7 @@ public class ValueColumnCell extends AbstractValueColumnCell {
 	private Node getDateField(Date value) {
 		if (dateField == null) {
 			dateField = new DateField(SimpleDateFormat.getDateTimeInstance());
-			//dateFieldContainer = new DecorationPane(dateField);
+			dateField.setPopupButtonVisible(true);
 		}
 		dateField.setValue(value);
 		return dateField;//dateFieldContainer;
