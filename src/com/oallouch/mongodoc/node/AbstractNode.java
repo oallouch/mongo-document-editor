@@ -2,6 +2,7 @@ package com.oallouch.mongodoc.node;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.TreeItem;
 
 public abstract class AbstractNode {
 	/**
@@ -9,6 +10,7 @@ public abstract class AbstractNode {
 	 * . null is no error
 	 */
 	private StringProperty error = new SimpleStringProperty();
+	private TreeItem<AbstractNode> treeItem;
 
     public String getError() {
         return error.get();
@@ -19,6 +21,13 @@ public abstract class AbstractNode {
     }
 	public StringProperty errorProperty() {
 		return error;
+	}
+	
+	public TreeItem getTreeItem() {
+		return treeItem;
+	}
+	public void setTreeItem(TreeItem treeItem) {
+		this.treeItem = treeItem;
 	}
 
     @Override

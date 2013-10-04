@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc;
 
+import com.oallouch.mongodoc.output.OutputPane;
 import com.oallouch.mongodoc.tree.DocumentTree;
 import java.util.Map;
 import javafx.event.EventType;
@@ -10,32 +11,22 @@ import javafx.scene.layout.StackPane;
 public class DocumentEditor extends SplitPane {
 	public static final EventType<InputEvent> MODIFIED = new EventType<>(InputEvent.ANY, "MODIFIED");
 	private DocumentTree documentTree;
-	private JsonArea jsonArea;
-	private boolean tempEventBlocking;
+	private OutputPane outputPane;
 
 	public DocumentEditor() {
 		documentTree = new DocumentTree();
 		documentTree.addEventHandler(MODIFIED, e -> {
 			System.out.println("documentTree MODIFIED");
 			Map<String, Object> jsonObject = documentTree.getRootJsonObject();
-			tempEventBlocking = true;
-			try {
-				jsonArea.setRootJsonObject(jsonObject);
-			} finally {
-				tempEventBlocking = false;
-			}
-			
-		});
-		jsonArea = new JsonArea();
-		jsonArea.addEventHandler(MODIFIED, e -> {
-			if (!tempEventBlocking) {
-				System.out.println("jsonArea MODIFIED");
-				Map<String, Object> jsonObject = jsonArea.getRootJsonObject();
-				documentTree.setRootJsonObject(jsonObject);
-			}
+			outputPane.setRootJsonObject(jsonObject);
 		});
 
-		getItems().addAll(new StackPane(documentTree), new StackPane(jsonArea));
+		outputPane = new OutputPane();
+		outputPane.addEventHandler(MODIFIED, e -> {
+			documentTree.setRootJsonObject(outputPane.getRootJsonObject());
+		});
+		
+		getItems().addAll(new StackPane(documentTree), new StackPane(outputPane));
 		setDividerPositions(0.7f, 0.3f);
 	}
 
@@ -47,9 +38,11 @@ public class DocumentEditor extends SplitPane {
 	}
 
 	public String getJsonText() {
-		return jsonArea.getJsonText();
+		return outputPane.getJsonText();
 	}
 	public void setJsonText(String jsonText) {
-		jsonArea.setJsonText(jsonText);
+		outputPane.setJsonText(jsonText);
+		// jsonArea parses the text
+		documentTree.setRootJsonObject(outputPane.getRootJsonObject());
 	}
 }

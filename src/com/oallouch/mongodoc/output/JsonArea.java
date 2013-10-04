@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc;
+package com.oallouch.mongodoc.output;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.InputEvent;

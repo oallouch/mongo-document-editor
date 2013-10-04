@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.oallouch.mongodoc.node.AbstractNode;
 import com.oallouch.mongodoc.node.ArrayElementNode;
 import com.oallouch.mongodoc.node.ArrayEndNode;
+import com.oallouch.mongodoc.node.NodeTreeItem;
 import com.oallouch.mongodoc.node.PropertiesEndNode;
 import com.oallouch.mongodoc.node.PropertyNode;
 import com.oallouch.mongodoc.node.RootNode;
@@ -26,7 +27,7 @@ public class TreeItemFactory {
 	//---------------------- json Object => TreeItem -------------------------//
 	//------------------------------------------------------------------------//
 	public static void createRootTreeItem(Map<String, ?> jsonObject, TreeItem root) {
-		TreeItem<AbstractNode> rootTreeItem = new TreeItem<>(new RootNode());
+		NodeTreeItem rootTreeItem = new NodeTreeItem(new RootNode());
 		createPropertyTreeItems(jsonObject, rootTreeItem);
 		root.getChildren().add(rootTreeItem);
 		root.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
@@ -38,8 +39,8 @@ public class TreeItemFactory {
 		}
 	}
 	private static void createPropertyTreeItem(String name, Object jsonValue, TreeItem parent) {
-		PropertyNode propertyNode = new PropertyNode(name, jsonValue);
-		TreeItem<AbstractNode> propertyItem = new TreeItem<>(propertyNode);
+		PropertyNode propertyNode = new PropertyNode(name, getNodeValue(jsonValue));
+		NodeTreeItem propertyItem = new NodeTreeItem(propertyNode);
 		addValueTreeItem(propertyItem, jsonValue, parent); // can be several items
 		addClosingItem(propertyNode, parent);
 	}
@@ -52,18 +53,28 @@ public class TreeItemFactory {
 		}
 	}
 	private static void createArrayElementTreeItem(int index, Object jsonValue, TreeItem parent) {
-		ArrayElementNode arrayElementNode = new ArrayElementNode(jsonValue);
+		ArrayElementNode arrayElementNode = new ArrayElementNode(getNodeValue(jsonValue));
 		arrayElementNode.setIndex(index);
-		TreeItem<AbstractNode> arrayElementItem = new TreeItem<>(arrayElementNode);
+		NodeTreeItem arrayElementItem = new NodeTreeItem(arrayElementNode);
 		addValueTreeItem(arrayElementItem, jsonValue, parent);
 		addClosingItem(arrayElementNode, parent);
 	}
 	
+	private static Object getNodeValue(Object jsonValue) {
+		if (jsonValue instanceof Map) {
+			return SpecialValue.properties;
+		} else if (jsonValue instanceof List) {
+			return SpecialValue.array;
+		} else {
+			return jsonValue;
+		}
+	}
+	
 	private static void addClosingItem(WithValueNode withValueNode, TreeItem parent) {
 		if (withValueNode.isValueProperties()) {
-			parent.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
+			parent.getChildren().add(new NodeTreeItem(new PropertiesEndNode()));
 		} else if (withValueNode.isValueArray()) {
-			parent.getChildren().add(new TreeItem<>(new ArrayEndNode()));
+			parent.getChildren().add(new NodeTreeItem(new ArrayEndNode()));
 		}
 	}
 	

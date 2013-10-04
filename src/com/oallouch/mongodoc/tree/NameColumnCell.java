@@ -11,13 +11,14 @@ import com.oallouch.mongodoc.node.WithValueNode;
 import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 
+/**
+ * shows names, but also ": {", ": [", "}" or "]" signs, which are, of course, not  editable
+ */
 public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 	private static ObservableList<String> QUERY_OPERATORS = FXCollections.observableArrayList(
 		"$gt", "$gte", "$in", "$lt", "$lte", "$ne", "$nin"

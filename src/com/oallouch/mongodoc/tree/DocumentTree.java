@@ -13,6 +13,7 @@ import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.InputEvent;
 import javafx.scene.layout.StackPane;
 
@@ -34,14 +35,14 @@ public class DocumentTree extends StackPane {
 		nameCol.setSortable(false);
 		nameCol.addEventHandler(MODIFIED, e -> fireModified());
 
-		TreeTableColumn<AbstractNode, AbstractNode> valueCol = new TreeTableColumn<>("Value");
-		valueCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		TreeTableColumn<AbstractNode, Object> valueCol = new TreeTableColumn<>("Value");
+		valueCol.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
 		valueCol.setCellFactory(treeTableColumn -> new ValueColumnCell());
 		valueCol.setSortable(false);
 		valueCol.addEventHandler(MODIFIED, e -> fireModified());
 
-		TreeTableColumn<AbstractNode, AbstractNode> typeCol = new TreeTableColumn<>("Type");
-		typeCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		TreeTableColumn<AbstractNode, Object> typeCol = new TreeTableColumn<>("Type");
+		typeCol.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
 		typeCol.setCellFactory(treeTableColumn -> new TypeColumnCell());
 		typeCol.setSortable(false);
 		typeCol.addEventHandler(MODIFIED, e -> fireModified());
