@@ -1,33 +1,32 @@
 package com.oallouch.mongodoc.tree;
 
+import com.oallouch.mongodoc.tree.cell.TypeColumnCell;
+import com.oallouch.mongodoc.tree.cell.ValueColumnCell;
+import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
-import com.oallouch.mongodoc.node.AbstractNode;
+import com.oallouch.mongodoc.tree.node.AbstractNode;
+import com.oallouch.mongodoc.util.TreeTableUtils;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SelectionModel;
+import javafx.geometry.Pos;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeSortMode;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.InputEvent;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Pane;
 
 
-public class DocumentTree extends StackPane {
+public class DocumentTree extends Pane {
 	private TreeTableView<AbstractNode> treeTable;
+	private FloatingButtonBars buttonBars;
 	private TreeItem hiddenRootItem;
-    private Menu cmiNodes;
-    private MenuItem cmiRemove;
     
     public DocumentTree() {
-        // Set the tree view not resizable when container grow up
-        //SplitPane.setResizableWithParent(bpLeft, Boolean.FALSE);
-
 		treeTable = new TreeTableView<>();
 		TreeTableColumn<AbstractNode, AbstractNode> nameCol = new TreeTableColumn<>("Name");
 		nameCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
@@ -61,7 +60,16 @@ public class DocumentTree extends StackPane {
 		treeTable.setShowRoot(false);
 		
 		this.getChildren().add(treeTable);
+		
+		buttonBars = new FloatingButtonBars(this, treeTable);
     }
+
+	@Override
+	protected void layoutChildren() {
+		super.layoutChildren(); // to autosize children
+		treeTable.resize(getWidth(), getHeight());
+	}
+	
     
     public void reset() {
         setRootJsonObject(new HashMap<>());
@@ -89,65 +97,15 @@ public class DocumentTree extends StackPane {
 			expandAll(childItem);
 		}
 	}
-    
-    /*
-     * Add/Remove the menu item of the treeview in function of the
-     * selected teenode value. This function is intended to avoid adding bad node
-     * to others node, but DOES NOT VALIDATE the query.
-     */
-    private void contextMenuRequest() {
-        //Find what item is selected
-        final SelectionModel<TreeItem<AbstractNode>> sModel = treeTable.getSelectionModel();
-        final TreeItem<AbstractNode> selected = sModel.getSelectedItem();
-
-        if (selected == null) {
-            // none was selected ?
-            cmiNodes.setDisable(true);
-            cmiRemove.setDisable(true);
-        } else {
-            // Create allowed menu items for the node
-            List<MenuItem> items = cmiNodes.getItems();
-            items.clear();
-            final AbstractNode selectedNode = selected.getValue();
-            /*for (Class<? extends AbstractNode> clazz : selectedNode.getAcceptedChildrenTypes()) {
-                MenuItem menuItem = new MenuItem(clazz.getSimpleName());
-                menuItem.setUserData(clazz);
-                menuItem.setOnAction(e -> {
-					MenuItem menuItem1 = (MenuItem) e.getSource();
-					Class<? extends AbstractNode> nodeClass = (Class) menuItem1.getUserData();
-					AbstractNode node;
-					try {
-						node = nodeClass.newInstance();
-					} catch (IllegalAccessException | InstantiationException ex) {
-						// should never happens
-						throw new RuntimeException(ex);
-					}
-					selectedNode.addChild(node);
-					TreeItem<AbstractNode> newTreeItem = new TreeItem<>(node);
-					selected.getChildren().add(newTreeItem);
-					selected.setExpanded(true);
-					sModel.select(newTreeItem);
-				});
-                items.add(menuItem);
-            }*/
-            // avoid root deletion and disable the nodes menu if needed
-            cmiNodes.setDisable(items.isEmpty());
-            cmiRemove.setDisable(selected.getParent() == null);
-        }
-    }
-
-    /*
-     * Remove an item from the query tree
-     */
-    private void removeItem() {
-        // Get the selected item to remove
-        SelectionModel<TreeItem<AbstractNode>> sModel = treeTable.getSelectionModel();
-        TreeItem<AbstractNode> selected = sModel.getSelectedItem();
-        
-        // Remove also the node from the AbstractNode parent and select root node again
-        //AbstractNode parent = selected.getValue().getParent();
-        //parent.removeChild(selected.getValue());
-        selected.getParent().getChildren().remove(selected);
-        sModel.selectPrevious();
-    }
+	
+	public void editName(TreeItem<AbstractNode> treeItem) {
+		treeTable.edit(treeTable.getRow(treeItem), treeTable.getColumns().get(0));
+	}
+	public void editValue(TreeItem<AbstractNode> treeItem) {
+		treeTable.edit(treeTable.getRow(treeItem), treeTable.getColumns().get(1));
+	}
+	
+	public TreeTableRow<AbstractNode> getTreeTableRow(TreeItem<AbstractNode> treeItem) {
+		return TreeTableUtils.getTreeTableRow(treeTable, treeItem);
+	}
 }

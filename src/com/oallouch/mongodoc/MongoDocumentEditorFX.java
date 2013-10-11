@@ -37,6 +37,7 @@ public class MongoDocumentEditorFX extends Application {
 		root.getChildren().add(documentEditor);
 
 		Scene scene = new Scene(root, 1000, 500);
+		scene.getStylesheets().add("com/oallouch/mongodoc/DocumentEditor.css");
 
 		primaryStage.setTitle("Mongo Document Editor");
 		primaryStage.setScene(scene);

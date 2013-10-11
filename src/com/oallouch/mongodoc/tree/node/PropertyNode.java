@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.node;
+package com.oallouch.mongodoc.tree.node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,9 @@ public class PropertyNode extends WithValueNode {
 
 	private StringProperty name = new SimpleStringProperty("name" + counter++);
 
+	public PropertyNode(Object value) {
+		super(value);
+	}
 	public PropertyNode(String name, Object value) {
 		super(value);
 		setName(name);

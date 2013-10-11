@@ -1,9 +1,10 @@
-package com.oallouch.mongodoc.tree;
+package com.oallouch.mongodoc.tree.cell;
 
 import com.oallouch.mongodoc.DocumentEditor;
-import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.WithValueNode;
-import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
+import com.oallouch.mongodoc.tree.DataType;
+import com.oallouch.mongodoc.tree.node.AbstractNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;

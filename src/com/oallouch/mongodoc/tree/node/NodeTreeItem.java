@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.node;
+package com.oallouch.mongodoc.tree.node;
 
 import javafx.scene.control.TreeItem;
 

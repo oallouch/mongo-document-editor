@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.tree;
 
+import com.oallouch.mongodoc.tree.cell.TypeColumnCell;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import java.util.Date;

@@ -1,14 +1,14 @@
-package com.oallouch.mongodoc.tree;
+package com.oallouch.mongodoc.tree.cell;
 
 import com.oallouch.mongodoc.DocumentEditor;
-import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.ArrayElementNode;
-import com.oallouch.mongodoc.node.ArrayEndNode;
-import com.oallouch.mongodoc.node.PropertiesEndNode;
-import com.oallouch.mongodoc.node.PropertyNode;
-import com.oallouch.mongodoc.node.RootNode;
-import com.oallouch.mongodoc.node.WithValueNode;
-import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
+import com.oallouch.mongodoc.tree.node.AbstractNode;
+import com.oallouch.mongodoc.tree.node.ArrayElementNode;
+import com.oallouch.mongodoc.tree.node.ArrayEndNode;
+import com.oallouch.mongodoc.tree.node.PropertiesEndNode;
+import com.oallouch.mongodoc.tree.node.PropertyNode;
+import com.oallouch.mongodoc.tree.node.RootNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;

@@ -1,6 +1,7 @@
-package com.oallouch.mongodoc.tree;
+package com.oallouch.mongodoc.tree.cell;
 
 import com.oallouch.mongodoc.DocumentEditor;
+import com.oallouch.mongodoc.tree.DataType;
 import java.util.Arrays;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

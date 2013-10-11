@@ -1,15 +1,15 @@
 package com.oallouch.mongodoc.tree;
 
 import com.google.common.collect.Maps;
-import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.ArrayElementNode;
-import com.oallouch.mongodoc.node.ArrayEndNode;
-import com.oallouch.mongodoc.node.NodeTreeItem;
-import com.oallouch.mongodoc.node.PropertiesEndNode;
-import com.oallouch.mongodoc.node.PropertyNode;
-import com.oallouch.mongodoc.node.RootNode;
-import com.oallouch.mongodoc.node.WithValueNode;
-import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
+import com.oallouch.mongodoc.tree.node.AbstractNode;
+import com.oallouch.mongodoc.tree.node.ArrayElementNode;
+import com.oallouch.mongodoc.tree.node.ArrayEndNode;
+import com.oallouch.mongodoc.tree.node.NodeTreeItem;
+import com.oallouch.mongodoc.tree.node.PropertiesEndNode;
+import com.oallouch.mongodoc.tree.node.PropertyNode;
+import com.oallouch.mongodoc.tree.node.RootNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,9 +71,9 @@ public class TreeItemFactory {
 	}
 	
 	private static void addClosingItem(WithValueNode withValueNode, TreeItem parent) {
-		if (withValueNode.isValueProperties()) {
+		if (withValueNode.isContainsProperties()) {
 			parent.getChildren().add(new NodeTreeItem(new PropertiesEndNode()));
-		} else if (withValueNode.isValueArray()) {
+		} else if (withValueNode.isContainsArrayElements()) {
 			parent.getChildren().add(new NodeTreeItem(new ArrayEndNode()));
 		}
 	}
@@ -89,9 +89,9 @@ public class TreeItemFactory {
 		WithValueNode withValueNode = (WithValueNode) withValueTreeItem.getValue();
 		
 		//-------------- the children ----------------//
-		if (withValueNode.isValueProperties()) {
+		if (withValueNode.isContainsProperties()) {
 			createPropertyTreeItems((Map<String, ?>) jsonValue, withValueTreeItem);
-		} else if (withValueNode.isValueArray()) {
+		} else if (withValueNode.isContainsArrayElements()) {
 			createArrayElementTreeItems((List) jsonValue, withValueTreeItem);
 		}
 	}

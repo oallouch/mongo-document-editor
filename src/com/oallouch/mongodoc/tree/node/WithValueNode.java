@@ -1,4 +1,4 @@
-package com.oallouch.mongodoc.node;
+package com.oallouch.mongodoc.tree.node;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,12 +12,6 @@ public abstract class WithValueNode extends AbstractNode {
 		setValue(value);
 	}
 	
-	public boolean isValueProperties() {
-		return value.get() == SpecialValue.properties;
-	}
-	public boolean isValueArray() {
-		return value.get() == SpecialValue.array;
-	}
 	public boolean isValuePrimitive() {
 		return !(value.get() instanceof SpecialValue);
 	}

@@ -1,8 +1,9 @@
-package com.oallouch.mongodoc.tree;
+package com.oallouch.mongodoc.tree.cell;
 
-import com.oallouch.mongodoc.node.AbstractNode;
-import com.oallouch.mongodoc.node.WithValueNode;
-import com.oallouch.mongodoc.node.WithValueNode.SpecialValue;
+import com.oallouch.mongodoc.tree.DataType;
+import com.oallouch.mongodoc.tree.node.AbstractNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import javafx.scene.control.TreeTableCell;
 
 public abstract class AbstractValueColumnCell extends TreeTableCell<AbstractNode, Object> {
