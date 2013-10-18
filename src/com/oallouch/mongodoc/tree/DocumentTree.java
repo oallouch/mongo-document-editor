@@ -4,15 +4,13 @@ import com.oallouch.mongodoc.tree.cell.TypeColumnCell;
 import com.oallouch.mongodoc.tree.cell.ValueColumnCell;
 import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
+import com.oallouch.mongodoc.tree.cell.NameColumnValueFactory;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.util.TreeTableUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.geometry.Pos;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeSortMode;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
@@ -23,13 +21,12 @@ import javafx.scene.layout.Pane;
 
 public class DocumentTree extends Pane {
 	private TreeTableView<AbstractNode> treeTable;
-	private FloatingButtonBars buttonBars;
 	private TreeItem hiddenRootItem;
     
     public DocumentTree() {
 		treeTable = new TreeTableView<>();
-		TreeTableColumn<AbstractNode, AbstractNode> nameCol = new TreeTableColumn<>("Name");
-		nameCol.setCellValueFactory(cellDataFeatures -> new ReadOnlyObjectWrapper(cellDataFeatures.getValue().getValue()));
+		TreeTableColumn nameCol = new TreeTableColumn<>("Name"); // generics can't be used here
+		nameCol.setCellValueFactory(new NameColumnValueFactory());
 		nameCol.setCellFactory(treeTableColumn -> new NameColumnCell());
 		nameCol.setSortable(false);
 		nameCol.addEventHandler(MODIFIED, e -> fireModified());
@@ -61,7 +58,7 @@ public class DocumentTree extends Pane {
 		
 		this.getChildren().add(treeTable);
 		
-		buttonBars = new FloatingButtonBars(this, treeTable);
+		new FloatingButtonBars(this, treeTable);
     }
 
 	@Override

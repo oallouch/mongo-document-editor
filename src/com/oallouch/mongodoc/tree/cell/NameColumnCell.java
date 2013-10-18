@@ -19,16 +19,17 @@ import javafx.scene.input.KeyCode;
 /**
  * shows names, but also ": {", ": [", "}" or "]" signs, which are, of course, not  editable
  */
-public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
+public class NameColumnCell extends AbstractCell {
 	private static ObservableList<String> QUERY_OPERATORS = FXCollections.observableArrayList(
 		"$gt", "$gte", "$in", "$lt", "$lte", "$ne", "$nin"
 	);
 	private ComboBox combo;
 
 	@Override
-	protected void updateItem(AbstractNode node, boolean empty) {
+	protected void updateItem(Object cellValue, boolean empty) {
+        super.updateItem(cellValue, empty);
+		AbstractNode node = getAbstractNode();
         setEditable(node instanceof PropertyNode);
-        super.updateItem(node, empty);
 		
 		if (node == null) {
             setText(null);
@@ -36,6 +37,8 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 			setEditable(false);
 			return;
 		}
+		
+		//System.out.println("index: " + getIndex() + ", node type: " + node.getClass().getSimpleName());
 
 		if (isEditing()) {
 			if (combo != null) {
@@ -48,6 +51,10 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 			setText(text);
 			setGraphic(null);
 		}
+	}
+	
+	private AbstractNode getAbstractNode() {
+		return getTreeTableRow().getItem();
 	}
 	
 	private static String getReadValue(AbstractNode node) {
@@ -83,7 +90,7 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 		if (!isEditable()) {
 			return;
 		}
-		final AbstractNode node = getItem();
+		final AbstractNode node = getAbstractNode();
 		//-- graphic lazy init --//
 		if (combo == null) {
 			// inspired by CellUtils
@@ -116,7 +123,7 @@ public class NameColumnCell extends TreeTableCell<AbstractNode, AbstractNode> {
 	public void cancelEdit() {
         super.cancelEdit();
 
-		PropertyNode propertyNode = (PropertyNode) getItem();
+		PropertyNode propertyNode = (PropertyNode) getAbstractNode();
 		
 		String newName = (String) combo.getValue();
 		if (!newName.equals(propertyNode.getName())) {

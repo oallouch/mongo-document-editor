@@ -4,10 +4,13 @@ import com.oallouch.mongodoc.tree.DataType;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
+import javafx.event.EventHandler;
 import javafx.scene.control.TreeTableCell;
+import javafx.scene.input.MouseEvent;
 
-public abstract class AbstractValueColumnCell extends TreeTableCell<AbstractNode, Object> {
+public abstract class AbstractValueColumnCell extends AbstractCell {
 	private DataType dataType;
+	
 
 	@Override
 	protected void updateItem(Object value, boolean empty) {
@@ -25,6 +28,7 @@ public abstract class AbstractValueColumnCell extends TreeTableCell<AbstractNode
 		if (empty) {
 			setText(null);
 			setGraphic(null);
+			setEditable(false);
 			return;
 		}
 		

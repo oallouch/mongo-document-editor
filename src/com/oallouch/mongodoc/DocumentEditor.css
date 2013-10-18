@@ -1,3 +1,11 @@
 .treeTableFloatingButtonBarHBox {
 	-fx-spacing: 2px;
 }
+.floatingButton {
+	-fx-background-color: #e7e7e7;
+	-fx-background-radius: 4px;
+	-fx-font-size: 11px;
+}
+.floatingButton:hover {
+	-fx-background-color: #d0d0d0;
+}

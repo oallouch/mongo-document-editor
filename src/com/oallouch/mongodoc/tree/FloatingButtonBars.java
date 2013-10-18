@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.tree;
 
+import com.google.common.collect.Lists;
 import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.tree.node.ArrayElementNode;
@@ -7,28 +8,36 @@ import com.oallouch.mongodoc.tree.node.ArrayEndNode;
 import com.oallouch.mongodoc.tree.node.NodeTreeItem;
 import com.oallouch.mongodoc.tree.node.PropertiesEndNode;
 import com.oallouch.mongodoc.tree.node.PropertyNode;
+import com.oallouch.mongodoc.tree.node.WithValueNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import com.oallouch.mongodoc.util.TreeTableUtils;
-import javafx.beans.value.ChangeListener;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
+import com.sun.javafx.scene.control.skin.VirtualScrollBar;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 public class FloatingButtonBars {
+	/** manually found */
 	private DocumentTree documentTree;
 	private TreeTableView<AbstractNode> treeTable;
+	private TreeItem<AbstractNode> selectedItem;
 	private TreeItem<AbstractNode> selectedContainerItem;
-	private HBox horizontalButtonBar;
+	private HBox containerButtonBar;
+	/** even if there's 1 button, lineButtonBar is usefull to center it */
+	private HBox lineButtonBar;
 	
 	public FloatingButtonBars(DocumentTree documentTree, TreeTableView<AbstractNode> treeTable) {
 		this.documentTree = documentTree;
@@ -42,42 +51,49 @@ public class FloatingButtonBars {
 			if (selectedContainerItem == null) {
 				return;
 			}
-			AbstractNode selectedNode = selectedContainerItem.getValue();
-			if (selectedNode.isContainsProperties()) {
-				addProperty(""); // a String by default
-			} else if (selectedNode.isContainsArrayElements()) {
-				addArrayElement("");
-			}
+			addValue("");
 		});
 		//-- add properties --//
 		Button addProperties = createButton("+{}", "Add a Document", e -> {
 			if (selectedContainerItem == null) {
 				return;
 			}
-			AbstractNode selectedNode = selectedContainerItem.getValue();
-			if (selectedNode.isContainsProperties()) {
-				addProperty(SpecialValue.properties);
-			} else if (selectedNode.isContainsArrayElements()) {
-				addArrayElement(SpecialValue.properties);
-			}
+			addValue(SpecialValue.properties);
 		});
 		//-- add array --//
 		Button addArray = createButton("+[]", "Add a List", e -> {
 			if (selectedContainerItem == null) {
 				return;
 			}
-			AbstractNode selectedNode = selectedContainerItem.getValue();
-			if (selectedNode.isContainsProperties()) {
-				addProperty(SpecialValue.array);
-			} else if (selectedNode.isContainsArrayElements()) {
-				addArrayElement(SpecialValue.array);
-			}
+			addValue(SpecialValue.array);
 		});
 		
-		horizontalButtonBar = new HBox(addPrimitive, addProperties, addArray);
-		horizontalButtonBar.getStyleClass().add("treeTableFloatingButtonBarHBox");
-		horizontalButtonBar.setVisible(false);
-		documentTree.getChildren().add(horizontalButtonBar);
+		containerButtonBar = new HBox(addPrimitive, addProperties, addArray);
+		containerButtonBar.setAlignment(Pos.CENTER);
+		containerButtonBar.getStyleClass().add("treeTableFloatingButtonBarHBox");
+		containerButtonBar.setVisible(false);
+		documentTree.getChildren().add(containerButtonBar);
+		
+		//--------------------------------------------------------------------//
+		//-------------------------- Remove Button ---------------------------//
+		//--------------------------------------------------------------------//
+		Button removeNodeButton = createButton("X", "Remove", e -> {
+			// if it's not a WithValueNode, it's not visible
+			WithValueNode selectedNode = (WithValueNode) selectedItem.getValue();
+			AbstractNode closingNode = selectedNode.getEndingNode();
+			// we have to use removeAll because a removal changes the selectedItem
+			// so, to avoid trouble, it's simpler to it all at once
+			if (closingNode != null) {
+				selectedItem.getParent().getChildren().removeAll(selectedItem, closingNode.getTreeItem());
+			} else {
+				selectedItem.getParent().getChildren().remove(selectedItem);
+			}
+		});
+		lineButtonBar = new HBox(removeNodeButton);
+		lineButtonBar.setAlignment(Pos.CENTER);
+		lineButtonBar.setLayoutX(3);
+		lineButtonBar.setVisible(false);
+		documentTree.getChildren().add(lineButtonBar);
 		
 		//--------------------------------------------------------------------//
 		//---------------------------- Listeners -----------------------------//
@@ -86,7 +102,22 @@ public class FloatingButtonBars {
 		// hides the button bar when editing
 		treeTable.editingCellProperty().addListener((observableValue, oldPosition, newPosition) -> {
 			if (newPosition != null) {
-				horizontalButtonBar.setVisible(false);
+				containerButtonBar.setVisible(false);
+			}
+		});
+		// layout listener (for the scroll) on the VirtualFlow, which isn't created yet
+		treeTable.getChildrenUnmodifiable().addListener(change -> {
+			while (change.next()) {
+				for (Node node : change.getAddedSubList()) {
+					if (node instanceof VirtualFlow) {
+						((VirtualFlow) node).needsLayoutProperty().addListener((ov, oldValue, newValue) -> {
+							if (!newValue) {
+								layoutButtons();
+							}
+						});
+						// if we listen to the VirtualScrollBar, we get the event too early and the rest of the TreeTableView hasn't scrolled yet
+					}
+				}
 			}
 		});
 	}
@@ -95,46 +126,79 @@ public class FloatingButtonBars {
 		Button button = new Button(text);
 		button.setOnAction(actionListener);
 		button.setTooltip(new Tooltip(tooltipText));
+		button.getStyleClass().add("floatingButton");
 		return button;
 	}
 	
 	private void selectionChanged(ObservableValue<? extends TreeItem<AbstractNode>> observable, TreeItem<AbstractNode> oldValue, TreeItem<AbstractNode> newValue) {
 		if (newValue == null) {
+			selectedItem = null;
 			selectedContainerItem = null;
-			horizontalButtonBar.setVisible(false);
+			hideToolBars();
 		} else {
-			AbstractNode node = newValue.getValue();
-			System.out.println("selected node: " + node);
-			selectedContainerItem = node.findPropertiesOrArray().getTreeItem();
-			horizontalButtonBar.setVisible(true);
 			
-			//---------------------------- position --------------------------//
-			TreeTableRow<AbstractNode> row = documentTree.getTreeTableRow(selectedContainerItem);
-			NameColumnCell nameCell = TreeTableUtils.getCellOfType(row, NameColumnCell.class);
-			//-------------------- x -------------------//
-			Text nameText = TreeTableUtils.getChildOfType(nameCell, Text.class); // there can also be an arrow (the disclosure node)
-			horizontalButtonBar.setLayoutX(nameText.getBoundsInParent().getMaxX()
-				+ 10); // maybe a treeTable insert (plus a gap)
-			//-------------------- y -------------------//
-			double headerHeight = TreeTableUtils.getTableHeaderRow(treeTable).getHeight();
-			Bounds rowBounds = row.getBoundsInParent();
-			horizontalButtonBar.setLayoutY(
-				headerHeight
-				+ rowBounds.getMinY()
-				+ 15); // ?
+			//----------------- visibility ----------------------//
+			AbstractNode selectedNode = newValue.getValue();
+			selectedItem = selectedNode.getTreeItem();
+			if (!(selectedNode instanceof WithValueNode)) {
+				lineButtonBar.setVisible(false);
+			} else {
+				lineButtonBar.setVisible(true);
+			}
+			
+			containerButtonBar.setVisible(true);
+			
+			layoutButtons();
 		}
 	}
 	
-	private void addProperty(Object value) {
-		NodeTreeItem propertyItem     = new NodeTreeItem(new PropertyNode(value));
-		NodeTreeItem propertiesEndItem = new NodeTreeItem(new PropertiesEndNode());
-		selectedContainerItem.getChildren().addAll(propertyItem, propertiesEndItem);
-		//documentTree.editName(propertyItem);
+	private void hideToolBars() {
+		containerButtonBar.setVisible(false);
+		lineButtonBar.setVisible(false);
 	}
-	private void addArrayElement(Object value) {
-		NodeTreeItem arrayElementItem = new NodeTreeItem(new ArrayElementNode(value));
-		NodeTreeItem arrayEndItem     = new NodeTreeItem(new ArrayEndNode());
-		selectedContainerItem.getChildren().addAll(arrayElementItem, arrayEndItem);
-		//documentTree.editName(selectedContainerItem);
+	
+	private void layoutButtons() {
+		if (selectedItem == null) {
+			return;
+		}
+		double headerHeight = TreeTableUtils.getTableHeaderRow(treeTable).getHeight();
+		AbstractNode selectedNode = selectedItem.getValue();
+		if (lineButtonBar.isVisible()) {
+			//-- y --//
+			TreeTableRow<AbstractNode> selectedRow = documentTree.getTreeTableRow(selectedItem);
+			lineButtonBar.setPrefHeight(selectedRow.getHeight());
+			lineButtonBar.setLayoutY(
+				headerHeight
+				+ selectedRow.getBoundsInParent().getMinY()
+				+ selectedRow.getBaselineOffset());
+		}
+
+		//---------------- horizontal bar position -----------------------//
+		if (containerButtonBar.isVisible()) {
+			selectedContainerItem = selectedNode.findPropertiesOrArray().getTreeItem();
+			containerButtonBar.setVisible(true);
+			TreeTableRow<AbstractNode> containerRow = documentTree.getTreeTableRow(selectedContainerItem);
+			NameColumnCell nameCell = TreeTableUtils.getCellOfType(containerRow, NameColumnCell.class);
+			//---------------- x ---------------//
+			Text nameText = TreeTableUtils.getChildOfType(nameCell, Text.class); // there can also be an arrow (the disclosure node)
+			containerButtonBar.setLayoutX(nameText.getBoundsInParent().getMaxX()
+				+ 10); // maybe a treeTable insert (plus a gap)
+			//---------------- y ---------------//
+			containerButtonBar.setPrefHeight(containerRow.getHeight());
+			containerButtonBar.setLayoutY(
+				headerHeight
+				+ containerRow.getBoundsInParent().getMinY()
+				+ containerRow.getBaselineOffset());
+		}
+	}
+	
+	private void addValue(Object value) {
+		int index;
+		if (selectedContainerItem == selectedItem) {
+			index = -1;
+		} else {
+			index = selectedContainerItem.getChildren().indexOf(selectedItem) + 1;
+		}
+		selectedContainerItem.getValue().insert(value, index);
 	}
 }

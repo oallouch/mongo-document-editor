@@ -2,16 +2,12 @@ package com.oallouch.mongodoc.tree.cell;
 
 import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.tree.DataType;
-import com.oallouch.mongodoc.tree.node.AbstractNode;
-import com.oallouch.mongodoc.tree.node.WithValueNode;
-import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 import jidefx.scene.control.field.DateField;
