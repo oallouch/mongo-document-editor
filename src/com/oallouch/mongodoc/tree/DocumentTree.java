@@ -6,7 +6,7 @@ import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
 import com.oallouch.mongodoc.tree.cell.NameColumnValueFactory;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
-import com.oallouch.mongodoc.util.TreeTableUtils;
+import com.oallouch.mongodoc.util.FXUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,6 +103,6 @@ public class DocumentTree extends Pane {
 	}
 	
 	public TreeTableRow<AbstractNode> getTreeTableRow(TreeItem<AbstractNode> treeItem) {
-		return TreeTableUtils.getTreeTableRow(treeTable, treeItem);
+		return FXUtils.getTreeTableRow(treeTable, treeItem);
 	}
 }

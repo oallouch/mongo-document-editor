@@ -10,7 +10,7 @@ import com.oallouch.mongodoc.tree.node.PropertiesEndNode;
 import com.oallouch.mongodoc.tree.node.PropertyNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
-import com.oallouch.mongodoc.util.TreeTableUtils;
+import com.oallouch.mongodoc.util.FXUtils;
 import com.sun.javafx.scene.control.skin.VirtualFlow;
 import com.sun.javafx.scene.control.skin.VirtualScrollBar;
 import javafx.beans.value.ObservableValue;
@@ -161,7 +161,7 @@ public class FloatingButtonBars {
 		if (selectedItem == null) {
 			return;
 		}
-		double headerHeight = TreeTableUtils.getTableHeaderRow(treeTable).getHeight();
+		double headerHeight = FXUtils.getTableHeaderRow(treeTable).getHeight();
 		AbstractNode selectedNode = selectedItem.getValue();
 		if (lineButtonBar.isVisible()) {
 			//-- y --//
@@ -178,9 +178,9 @@ public class FloatingButtonBars {
 			selectedContainerItem = selectedNode.findPropertiesOrArray().getTreeItem();
 			containerButtonBar.setVisible(true);
 			TreeTableRow<AbstractNode> containerRow = documentTree.getTreeTableRow(selectedContainerItem);
-			NameColumnCell nameCell = TreeTableUtils.getCellOfType(containerRow, NameColumnCell.class);
+			NameColumnCell nameCell = FXUtils.getCellOfType(containerRow, NameColumnCell.class);
 			//---------------- x ---------------//
-			Text nameText = TreeTableUtils.getChildOfType(nameCell, Text.class); // there can also be an arrow (the disclosure node)
+			Text nameText = FXUtils.getChildOfType(nameCell, Text.class); // there can also be an arrow (the disclosure node)
 			containerButtonBar.setLayoutX(nameText.getBoundsInParent().getMaxX()
 				+ 10); // maybe a treeTable insert (plus a gap)
 			//---------------- y ---------------//

@@ -59,6 +59,10 @@ public abstract class AbstractNode {
 		return isContainsProperties() || isContainsArrayElements();
 	}
 	
+	public boolean isEndNode() {
+		return this instanceof AbstractEndNode;
+	}
+	
 	public AbstractNode findPropertiesOrArray() {
 		AbstractNode currentNode = this;
 		while (currentNode != null) {

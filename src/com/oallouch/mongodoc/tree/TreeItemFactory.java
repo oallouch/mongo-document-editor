@@ -10,6 +10,7 @@ import com.oallouch.mongodoc.tree.node.PropertyNode;
 import com.oallouch.mongodoc.tree.node.RootNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
+import com.oallouch.mongodoc.util.FXUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,32 +34,29 @@ public class TreeItemFactory {
 		root.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
 	}
 	
-	private static void createPropertyTreeItems(Map<String, ?> jsonObject, TreeItem parent) {
-		for (Map.Entry<String, ?> propertyEntry : jsonObject.entrySet()) {
-			createPropertyTreeItem(propertyEntry.getKey(), propertyEntry.getValue(), parent);
-		}
-	}
-	private static void createPropertyTreeItem(String name, Object jsonValue, TreeItem parent) {
+	public static void createPropertyTreeItem(String name, Object jsonValue, TreeItem parent, int index) {
 		PropertyNode propertyNode = new PropertyNode(name, getNodeValue(jsonValue));
 		NodeTreeItem propertyItem = new NodeTreeItem(propertyNode);
-		addValueTreeItem(propertyItem, jsonValue, parent); // can be several items
-		addClosingItem(propertyNode, parent);
+		addValueTreeItem(propertyItem, jsonValue, parent, index); // can be several items
 	}
-	
-	private static void createArrayElementTreeItems(List jsonList, TreeItem parent) {
-		int index = 0;
-		for (Object arrayElement : jsonList) {
-			createArrayElementTreeItem(index, arrayElement, parent);
-			index++;
-		}
-	}
-	private static void createArrayElementTreeItem(int index, Object jsonValue, TreeItem parent) {
+	public static void createArrayElementTreeItem(Object jsonValue, TreeItem parent, int index) {
 		ArrayElementNode arrayElementNode = new ArrayElementNode(getNodeValue(jsonValue));
 		arrayElementNode.setIndex(index);
 		NodeTreeItem arrayElementItem = new NodeTreeItem(arrayElementNode);
-		addValueTreeItem(arrayElementItem, jsonValue, parent);
-		addClosingItem(arrayElementNode, parent);
+		addValueTreeItem(arrayElementItem, jsonValue, parent, index);
 	}
+	
+	private static void createArrayElementTreeItems(List jsonList, TreeItem parent) {
+		for (Object arrayElement : jsonList) {
+			createArrayElementTreeItem(arrayElement, parent, -1);
+		}
+	}
+	private static void createPropertyTreeItems(Map<String, ?> jsonObject, TreeItem parent) {
+		for (Map.Entry<String, ?> propertyEntry : jsonObject.entrySet()) {
+			createPropertyTreeItem(propertyEntry.getKey(), propertyEntry.getValue(), parent, -1);
+		}
+	}
+	
 	
 	private static Object getNodeValue(Object jsonValue) {
 		if (jsonValue instanceof Map) {
@@ -70,34 +68,28 @@ public class TreeItemFactory {
 		}
 	}
 	
-	private static void addClosingItem(WithValueNode withValueNode, TreeItem parent) {
-		if (withValueNode.isContainsProperties()) {
-			parent.getChildren().add(new NodeTreeItem(new PropertiesEndNode()));
-		} else if (withValueNode.isContainsArrayElements()) {
-			parent.getChildren().add(new NodeTreeItem(new ArrayEndNode()));
-		}
-	}
-	
 	/**
 	 * also adds withValueTreeItem to the parent
 	 * @param withValueTreeItem
 	 * @param jsonValue
 	 * @param parent 
 	 */
-	private static void addValueTreeItem(TreeItem<AbstractNode> withValueTreeItem, Object jsonValue, TreeItem parent) {
-		parent.getChildren().add(withValueTreeItem);
-		WithValueNode withValueNode = (WithValueNode) withValueTreeItem.getValue();
+	private static void addValueTreeItem(TreeItem<AbstractNode> withValueTreeItem, Object jsonValue, TreeItem parent, int index) {
+		int indexOfClosing = FXUtils.addChild(parent, withValueTreeItem, index) ? index + 1 : -1;
 		
 		//-------------- the children ----------------//
+		WithValueNode withValueNode = (WithValueNode) withValueTreeItem.getValue();
 		if (withValueNode.isContainsProperties()) {
 			createPropertyTreeItems((Map<String, ?>) jsonValue, withValueTreeItem);
+			parent.getChildren().add(indexOfClosing, new NodeTreeItem(new PropertiesEndNode()));
 		} else if (withValueNode.isContainsArrayElements()) {
 			createArrayElementTreeItems((List) jsonValue, withValueTreeItem);
+			parent.getChildren().add(indexOfClosing, new NodeTreeItem(new ArrayEndNode()));
 		}
 	}
 	
 	//------------------------------------------------------------------------//
-	//---------------------- json Object => TreeItem -------------------------//
+	//--------------------- json Object <==> TreeItem ------------------------//
 	//------------------------------------------------------------------------//
 	/**
 	 * @param rootTreeItem contains a RootNode, not a WithValueNode
@@ -107,7 +99,7 @@ public class TreeItemFactory {
 		return (Map<String, Object>) createJsonObject(rootTreeItem);
 	}
 	
-	private static Object createJsonValue(TreeItem<AbstractNode> withValueTreeItem) {
+	public static Object toJsonValue(TreeItem<AbstractNode> withValueTreeItem) {
 		WithValueNode withValueNode = (WithValueNode) withValueTreeItem.getValue();
 		Object value = withValueNode.getValue();
 		ObservableList<TreeItem<AbstractNode>> childItems = withValueTreeItem.getChildren();
@@ -117,7 +109,7 @@ public class TreeItemFactory {
 			List<Object> childJsonArray = new ArrayList<>(childItems.size());
 			for (TreeItem<AbstractNode> arrayElementTreeItem : childItems) {
 				if (arrayElementTreeItem.getValue() instanceof ArrayElementNode) {
-					Object jsonValue = createJsonValue(arrayElementTreeItem);
+					Object jsonValue = toJsonValue(arrayElementTreeItem);
 					childJsonArray.add(jsonValue);
 				}
 			}
@@ -134,7 +126,7 @@ public class TreeItemFactory {
 			if (node instanceof PropertyNode) {
 				PropertyNode propertyNode = (PropertyNode) node;
 				String name = propertyNode.getName();
-				Object jsonValue = createJsonValue(propertyTreeItem);
+				Object jsonValue = toJsonValue(propertyTreeItem);
 				childJsonObject.put(name, jsonValue);
 			}
 		}

@@ -12,7 +12,6 @@ import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 
@@ -51,10 +50,6 @@ public class NameColumnCell extends AbstractCell {
 			setText(text);
 			setGraphic(null);
 		}
-	}
-	
-	private AbstractNode getAbstractNode() {
-		return getTreeTableRow().getItem();
 	}
 	
 	private static String getReadValue(AbstractNode node) {
