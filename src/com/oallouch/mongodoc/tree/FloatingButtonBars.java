@@ -1,21 +1,13 @@
 package com.oallouch.mongodoc.tree;
 
-import com.google.common.collect.Lists;
 import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
-import com.oallouch.mongodoc.tree.node.ArrayElementNode;
-import com.oallouch.mongodoc.tree.node.ArrayEndNode;
-import com.oallouch.mongodoc.tree.node.NodeTreeItem;
-import com.oallouch.mongodoc.tree.node.PropertiesEndNode;
-import com.oallouch.mongodoc.tree.node.PropertyNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode.SpecialValue;
 import com.oallouch.mongodoc.util.FXUtils;
 import com.sun.javafx.scene.control.skin.VirtualFlow;
-import com.sun.javafx.scene.control.skin.VirtualScrollBar;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -25,7 +17,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
@@ -78,16 +69,8 @@ public class FloatingButtonBars {
 		//-------------------------- Remove Button ---------------------------//
 		//--------------------------------------------------------------------//
 		Button removeNodeButton = createButton("X", "Remove", e -> {
-			// if it's not a WithValueNode, it's not visible
 			WithValueNode selectedNode = (WithValueNode) selectedItem.getValue();
-			AbstractNode closingNode = selectedNode.getEndingNode();
-			// we have to use removeAll because a removal changes the selectedItem
-			// so, to avoid trouble, it's simpler to it all at once
-			if (closingNode != null) {
-				selectedItem.getParent().getChildren().removeAll(selectedItem, closingNode.getTreeItem());
-			} else {
-				selectedItem.getParent().getChildren().remove(selectedItem);
-			}
+			selectedNode.remove();
 		});
 		lineButtonBar = new HBox(removeNodeButton);
 		lineButtonBar.setAlignment(Pos.CENTER);
@@ -106,7 +89,7 @@ public class FloatingButtonBars {
 			}
 		});
 		// layout listener (for the scroll) on the VirtualFlow, which isn't created yet
-		treeTable.getChildrenUnmodifiable().addListener(change -> {
+		treeTable.getChildrenUnmodifiable().addListener((Change<? extends Node> change) -> {
 			while (change.next()) {
 				for (Node node : change.getAddedSubList()) {
 					if (node instanceof VirtualFlow) {

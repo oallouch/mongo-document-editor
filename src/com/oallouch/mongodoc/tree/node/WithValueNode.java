@@ -13,6 +13,18 @@ public abstract class WithValueNode extends AbstractNode {
 		setValue(value);
 	}
 	
+	public void remove() {
+		AbstractNode closingNode = getEndingNode();
+		// we have to use removeAll because a removal changes the selectedItem
+		// so, to avoid trouble, it's simpler to it all at once
+		TreeItem<AbstractNode> treeItem = getTreeItem();
+		if (closingNode != null) {
+			treeItem.getParent().getChildren().removeAll(treeItem, closingNode.getTreeItem());
+		} else {
+			treeItem.getParent().getChildren().remove(treeItem);
+		}
+	}
+	
 	public AbstractNode getEndingNode() {
 		boolean thisFound = false;
 		TreeItem<AbstractNode> treeItem = getTreeItem();

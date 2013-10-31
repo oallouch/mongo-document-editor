@@ -34,16 +34,16 @@ public class TreeItemFactory {
 		root.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
 	}
 	
-	public static void createPropertyTreeItem(String name, Object jsonValue, TreeItem parent, int index) {
-		PropertyNode propertyNode = new PropertyNode(name, getNodeValue(jsonValue));
+	public static void createPropertyTreeItem(String propertyName, Object jsonValue, TreeItem parent, int index) {
+		PropertyNode propertyNode = new PropertyNode(propertyName, getNodeValue(jsonValue));
 		NodeTreeItem propertyItem = new NodeTreeItem(propertyNode);
 		addValueTreeItem(propertyItem, jsonValue, parent, index); // can be several items
 	}
 	public static void createArrayElementTreeItem(Object jsonValue, TreeItem parent, int index) {
 		ArrayElementNode arrayElementNode = new ArrayElementNode(getNodeValue(jsonValue));
-		arrayElementNode.setIndex(index);
 		NodeTreeItem arrayElementItem = new NodeTreeItem(arrayElementNode);
 		addValueTreeItem(arrayElementItem, jsonValue, parent, index);
+		arrayElementNode.setIndexFromPrecedingSibling();
 	}
 	
 	private static void createArrayElementTreeItems(List jsonList, TreeItem parent) {
@@ -79,12 +79,12 @@ public class TreeItemFactory {
 		
 		//-------------- the children ----------------//
 		WithValueNode withValueNode = (WithValueNode) withValueTreeItem.getValue();
-		if (withValueNode.isContainsProperties()) {
+		if (withValueNode.isProperties()) {
 			createPropertyTreeItems((Map<String, ?>) jsonValue, withValueTreeItem);
-			parent.getChildren().add(indexOfClosing, new NodeTreeItem(new PropertiesEndNode()));
-		} else if (withValueNode.isContainsArrayElements()) {
+			FXUtils.addChild(parent, new NodeTreeItem(new PropertiesEndNode()), indexOfClosing);
+		} else if (withValueNode.isArray()) {
 			createArrayElementTreeItems((List) jsonValue, withValueTreeItem);
-			parent.getChildren().add(indexOfClosing, new NodeTreeItem(new ArrayEndNode()));
+			FXUtils.addChild(parent, new NodeTreeItem(new ArrayEndNode()), indexOfClosing);
 		}
 	}
 	

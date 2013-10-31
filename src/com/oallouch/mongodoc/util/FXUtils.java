@@ -57,4 +57,8 @@ public class FXUtils {
 			return true;
 		}
 	}
+	
+	public static int getIndex(TreeItem item) {
+		return item.getParent().getChildren().indexOf(item);
+	}
 }
