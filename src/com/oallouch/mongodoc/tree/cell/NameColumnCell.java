@@ -37,8 +37,6 @@ public class NameColumnCell extends AbstractCell {
 			return;
 		}
 		
-		//System.out.println("index: " + getIndex() + ", node type: " + node.getClass().getSimpleName());
-
 		if (isEditing()) {
 			if (combo != null) {
 				combo.setValue(node.toString());
@@ -90,6 +88,10 @@ public class NameColumnCell extends AbstractCell {
 		if (combo == null) {
 			// inspired by CellUtils
 			combo = new ComboBox();
+			//combo.setPrefHeight(20);//this.getHeight());
+			/*this.heightProperty().addListener((observable, oldValue, newValue) -> {
+				System.out.println("new height: " + newValue);
+			});*/
 			combo.setItems(QUERY_OPERATORS);
 			combo.setEditable(true);
 			combo.setOnKeyReleased(t -> {

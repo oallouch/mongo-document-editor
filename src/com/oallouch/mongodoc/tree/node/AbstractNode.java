@@ -96,7 +96,6 @@ public abstract class AbstractNode implements Iterable<AbstractNode> {
 	public AbstractNode getNodeFromPathString(String pathString) {
 		AbstractNode node = getRootNode();
 		for (String part : Splitter.on('/').omitEmptyStrings().split(pathString)) {
-			System.out.println("part: " + part);
 			int openingBracketIndex = part.indexOf('[');
 			//-- property sub-part --//
 			String propertyName = part.substring(0,
@@ -273,9 +272,10 @@ public abstract class AbstractNode implements Iterable<AbstractNode> {
 	
 	/**
 	 * @param value primitive value or SpecialValue (for properties or array)
-	 * @param index 
+	 * @param index
+	 * @return
 	 */
-	public void insert(Object value, int index) {
+	public AbstractNode insert(Object value, int index) {
 		//-------------- nodes --------------//
 		AbstractNode openingNode = isProperties() ? new PropertyNode(value) : new ArrayElementNode(value);
 		AbstractNode closingNode;
@@ -295,6 +295,8 @@ public abstract class AbstractNode implements Iterable<AbstractNode> {
 			//-- reindexing --//
 			((WithValueNode) this).reindexArray();
 		}
+		
+		return openingNode;
 	}
 	
 	

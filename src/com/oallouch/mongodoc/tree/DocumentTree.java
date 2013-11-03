@@ -29,19 +29,16 @@ public class DocumentTree extends Pane {
 		nameCol.setCellValueFactory(new NameColumnValueFactory());
 		nameCol.setCellFactory(treeTableColumn -> new NameColumnCell());
 		nameCol.setSortable(false);
-		nameCol.addEventHandler(MODIFIED, e -> fireModified());
 
 		TreeTableColumn<AbstractNode, Object> valueCol = new TreeTableColumn<>("Value");
 		valueCol.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
 		valueCol.setCellFactory(treeTableColumn -> new ValueColumnCell());
 		valueCol.setSortable(false);
-		valueCol.addEventHandler(MODIFIED, e -> fireModified());
 
 		TreeTableColumn<AbstractNode, Object> typeCol = new TreeTableColumn<>("Type");
 		typeCol.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
 		typeCol.setCellFactory(treeTableColumn -> new TypeColumnCell());
 		typeCol.setSortable(false);
-		typeCol.addEventHandler(MODIFIED, e -> fireModified());
 		typeCol.setMinWidth(130);
 		typeCol.setMaxWidth(130);
 
@@ -50,7 +47,6 @@ public class DocumentTree extends Pane {
 		treeTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
 		treeTable.setEditable(true);
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
-		
 		
 		hiddenRootItem = new TreeItem();
 		treeTable.setRoot(hiddenRootItem);

@@ -1,6 +1,7 @@
 package com.oallouch.mongodoc.tree.cell;
 
 import com.google.common.collect.Maps;
+import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.tree.TreeItemFactory;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.tree.node.PropertyNode;
@@ -12,10 +13,13 @@ import java.util.Map;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.DataFormat;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.InputEvent;
 import javafx.scene.input.TransferMode;
 
+/**
+ * handles the drag and drop
+ */
 public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 	protected static final DataFormat DRAG_DROP_DATA_FORMAT_PROPERTY = new DataFormat("serialized json property");
 	protected static final DataFormat DRAG_DROP_DATA_FORMAT_ARRAY_ELEMENT = new DataFormat("serialized json array element");
@@ -52,13 +56,19 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 		
 		setOnDragOver(dragEvent -> {
 			if (!getAbstractNode().isEndNode()) {
-				dragEvent.acceptTransferModes(TransferMode.MOVE, TransferMode.COPY);
+				String sourcePath = (String) dragEvent.getDragboard().getContent(DRAG_DROP_DATA_FORMAT_PATH);
+				String destPath = getAbstractNode().getPathStringFromRoot();
+				if (!destPath.equals(sourcePath)) {
+					dragEvent.acceptTransferModes(TransferMode.COPY);
+					if (!destPath.startsWith(sourcePath)) {
+						dragEvent.acceptTransferModes(TransferMode.MOVE);
+					}
+				}
 			}
 			dragEvent.consume();
 		});
 		
 		setOnDragDropped(dragEvent -> {
-			log(dragEvent);
 			Dragboard dragboard = dragEvent.getDragboard();
 			TreeItem<AbstractNode> treeItem = getTreeItem();
 			AbstractNode node = treeItem.getValue();
@@ -90,7 +100,7 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 			//------------ propertyName and jsonValue -> TreeItems -----------//
 			//----------------------------------------------------------------//
 			TreeItem<AbstractNode> parentItem = treeItem.getParent();
-			int index = FXUtils.getIndex(treeItem);
+			int index = FXUtils.getIndexInParent(treeItem);
 			WithValueNode parentNode = (WithValueNode) parentItem.getValue();
 			
 			if (getAbstractNode() instanceof PropertyNode) {
@@ -98,17 +108,17 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 				if (propertyName == null || parentNode.containsPropertyName(propertyName)) {
 					propertyName = parentNode.getNextDefaultPropertyName();
 				}
-				TreeItemFactory.createPropertyTreeItem(propertyName, jsonValue, parentItem, index);
+				TreeItemFactory.createPropertyTreeItem(propertyName, jsonValue, parentItem, index)
+					.getTreeItem().setExpanded(true);
 			} else { // ArrayElementNode
-				TreeItemFactory.createArrayElementTreeItem(jsonValue, parentItem, index);
+				TreeItemFactory.createArrayElementTreeItem(jsonValue, parentItem, index)
+					.getTreeItem().setExpanded(true);
 				parentNode.reindexArray();
 			}
 			dragEvent.consume();
+			
+			this.fireEvent(new InputEvent(DocumentEditor.MODIFIED));
 		});
-	}
-	
-	private void log(DragEvent dragEvent) {
-		System.out.println("dragEvent: " + dragEvent);
 	}
 	
 	protected AbstractNode getAbstractNode() {

@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.output;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,6 +84,8 @@ public abstract class AbstractOutput extends BorderPane {
 	private AbstractOutput appendValue(Object value, int indentLevel) {
 		if (value == null) {
 			append("null");
+		} else if (value instanceof Date) {
+			appendDate((Date) value);
 		} else if (value instanceof Map) {
 			appendDBO((Map<String, Object>) value, indentLevel);
 		} else if (value instanceof List) {
@@ -93,5 +96,9 @@ public abstract class AbstractOutput extends BorderPane {
 			append(value.toString());
 		}
 		return this;
+	}
+	
+	protected void appendDate(Date date) {
+		append("new Date(").append(Long.toString(date.getTime())).append(")");
 	}
 }

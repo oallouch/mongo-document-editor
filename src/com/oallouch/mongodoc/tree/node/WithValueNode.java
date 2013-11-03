@@ -18,10 +18,14 @@ public abstract class WithValueNode extends AbstractNode {
 		// we have to use removeAll because a removal changes the selectedItem
 		// so, to avoid trouble, it's simpler to it all at once
 		TreeItem<AbstractNode> treeItem = getTreeItem();
+		TreeItem<AbstractNode> parent = treeItem.getParent();
 		if (closingNode != null) {
-			treeItem.getParent().getChildren().removeAll(treeItem, closingNode.getTreeItem());
+			parent.getChildren().removeAll(treeItem, closingNode.getTreeItem());
 		} else {
-			treeItem.getParent().getChildren().remove(treeItem);
+			parent.getChildren().remove(treeItem);
+		}
+		if (this instanceof ArrayElementNode) {
+			parent.getValue().reindexArray();
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.tree;
 
+import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.tree.cell.NameColumnCell;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.tree.node.WithValueNode;
@@ -17,6 +18,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
+import javafx.scene.input.InputEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
@@ -71,6 +74,8 @@ public class FloatingButtonBars {
 		Button removeNodeButton = createButton("X", "Remove", e -> {
 			WithValueNode selectedNode = (WithValueNode) selectedItem.getValue();
 			selectedNode.remove();
+			treeTable.requestFocus(); // the button stole it
+			treeTable.fireEvent(new InputEvent(DocumentEditor.MODIFIED));
 		});
 		lineButtonBar = new HBox(removeNodeButton);
 		lineButtonBar.setAlignment(Pos.CENTER);
@@ -182,6 +187,12 @@ public class FloatingButtonBars {
 		} else {
 			index = selectedContainerItem.getChildren().indexOf(selectedItem) + 1;
 		}
-		selectedContainerItem.getValue().insert(value, index);
+		AbstractNode addedNode = selectedContainerItem.getValue().insert(value, index);
+		int globalIndex = treeTable.getRow(addedNode.getTreeItem());
+		TreeTableViewSelectionModel selectionModel = (TreeTableViewSelectionModel) treeTable.getSelectionModel();
+		// we have to pass a column because cell selection is enabled
+		selectionModel.select(globalIndex, treeTable.getColumns().get(0));
+		treeTable.requestFocus(); // the button bar stole it
+		treeTable.fireEvent(new InputEvent(DocumentEditor.MODIFIED));
 	}
 }

@@ -34,16 +34,18 @@ public class TreeItemFactory {
 		root.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
 	}
 	
-	public static void createPropertyTreeItem(String propertyName, Object jsonValue, TreeItem parent, int index) {
+	public static PropertyNode createPropertyTreeItem(String propertyName, Object jsonValue, TreeItem parent, int index) {
 		PropertyNode propertyNode = new PropertyNode(propertyName, getNodeValue(jsonValue));
 		NodeTreeItem propertyItem = new NodeTreeItem(propertyNode);
 		addValueTreeItem(propertyItem, jsonValue, parent, index); // can be several items
+		return propertyNode;
 	}
-	public static void createArrayElementTreeItem(Object jsonValue, TreeItem parent, int index) {
+	public static ArrayElementNode createArrayElementTreeItem(Object jsonValue, TreeItem parent, int index) {
 		ArrayElementNode arrayElementNode = new ArrayElementNode(getNodeValue(jsonValue));
 		NodeTreeItem arrayElementItem = new NodeTreeItem(arrayElementNode);
 		addValueTreeItem(arrayElementItem, jsonValue, parent, index);
 		arrayElementNode.setIndexFromPrecedingSibling();
+		return arrayElementNode;
 	}
 	
 	private static void createArrayElementTreeItems(List jsonList, TreeItem parent) {
