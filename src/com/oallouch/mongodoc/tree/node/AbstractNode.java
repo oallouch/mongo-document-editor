@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableView;
 
 /**
  * the iterator method iterates over non end nodes
@@ -320,5 +321,14 @@ public abstract class AbstractNode implements Iterable<AbstractNode> {
 			}
 		}
 		treeItem.setExpanded(true);
+	}
+	
+	public AbstractNode select() {
+		TreeTableView<AbstractNode> treeTable = getRootNode().getTreeTable();
+		int index = treeTable.getRow(treeItem);
+		TreeTableView.TreeTableViewSelectionModel selectionModel = (TreeTableView.TreeTableViewSelectionModel) treeTable.getSelectionModel();
+		// we have to pass a column because cell selection is enabled
+		selectionModel.select(index, treeTable.getColumns().get(0));
+		return this;
 	}
 }

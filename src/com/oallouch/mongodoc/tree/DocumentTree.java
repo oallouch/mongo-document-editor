@@ -75,13 +75,12 @@ public class DocumentTree extends Pane {
 		return (Map<String, Object>) TreeItemFactory.toJsonObject((TreeItem) hiddenRootItem.getChildren().get(0));
 	}
 	public void setRootJsonObject(Map<String, Object> jsonObject) {
+		if (jsonObject == null) {
+			jsonObject = Collections.emptyMap();
+		}
 		hiddenRootItem.getChildren().clear();
-		TreeItemFactory.createRootTreeItem(jsonObject, hiddenRootItem);
+		TreeItemFactory.createRootTreeItem(treeTable, jsonObject, hiddenRootItem);
 		expandAll(treeTable.getRoot());
-	}
-	
-	private void fireModified() {
-		fireEvent(new InputEvent(MODIFIED));
 	}
 	
 	private void expandAll(TreeItem<?> item) {

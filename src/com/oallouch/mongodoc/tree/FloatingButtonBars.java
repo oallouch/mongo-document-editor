@@ -188,10 +188,7 @@ public class FloatingButtonBars {
 			index = selectedContainerItem.getChildren().indexOf(selectedItem) + 1;
 		}
 		AbstractNode addedNode = selectedContainerItem.getValue().insert(value, index);
-		int globalIndex = treeTable.getRow(addedNode.getTreeItem());
-		TreeTableViewSelectionModel selectionModel = (TreeTableViewSelectionModel) treeTable.getSelectionModel();
-		// we have to pass a column because cell selection is enabled
-		selectionModel.select(globalIndex, treeTable.getColumns().get(0));
+		addedNode.select();
 		treeTable.requestFocus(); // the button bar stole it
 		treeTable.fireEvent(new InputEvent(DocumentEditor.MODIFIED));
 	}

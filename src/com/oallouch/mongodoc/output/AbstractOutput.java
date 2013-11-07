@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.output;
 
+import codearea.control.CodeArea;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +21,11 @@ public abstract class AbstractOutput extends BorderPane {
 	public void setRootJsonObject(Map<String, Object> jsonObject) {
 		this.builder = new StringBuilder(1000);
 		appendDBO(jsonObject, 0);
-		textArea.setText(builder.toString());
+		textArea.replaceText(0, textArea.getLength(), builder.toString());
 		builder = null;
 	}
 	
-	private AbstractOutput append(String text) {
+	protected AbstractOutput append(String text) {
 		builder.append(text);
 		return this;
 	}

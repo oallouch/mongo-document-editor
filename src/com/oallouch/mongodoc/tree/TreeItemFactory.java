@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableView;
 
 /**
  * Why we use a node structure:
@@ -27,11 +28,13 @@ public class TreeItemFactory {
 	//------------------------------------------------------------------------//
 	//---------------------- json Object => TreeItem -------------------------//
 	//------------------------------------------------------------------------//
-	public static void createRootTreeItem(Map<String, ?> jsonObject, TreeItem root) {
-		NodeTreeItem rootTreeItem = new NodeTreeItem(new RootNode());
+	public static RootNode createRootTreeItem(TreeTableView<AbstractNode> treeTable, Map<String, ?> jsonObject, TreeItem root) {
+		RootNode rootNode = new RootNode(treeTable);
+		NodeTreeItem rootTreeItem = new NodeTreeItem(rootNode);
 		createPropertyTreeItems(jsonObject, rootTreeItem);
 		root.getChildren().add(rootTreeItem);
 		root.getChildren().add(new TreeItem<>(new PropertiesEndNode()));
+		return rootNode;
 	}
 	
 	public static PropertyNode createPropertyTreeItem(String propertyName, Object jsonValue, TreeItem parent, int index) {

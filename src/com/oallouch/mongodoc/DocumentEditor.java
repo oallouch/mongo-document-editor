@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc;
 
+import com.mongodb.DBObject;
 import com.oallouch.mongodoc.output.OutputPane;
 import com.oallouch.mongodoc.tree.DocumentTree;
 import java.util.Map;
@@ -42,6 +43,9 @@ public class DocumentEditor extends SplitPane {
 		return outputPane.getJsonText();
 	}
 	public void setJsonText(String jsonText) {
+		if (jsonText == null || jsonText.length() == 0) {
+			jsonText = "{}";
+		}
 		outputPane.setJsonText(jsonText);
 		// jsonArea parses the text
 		documentTree.setRootJsonObject(outputPane.getRootJsonObject());

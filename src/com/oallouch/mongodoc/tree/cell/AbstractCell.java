@@ -109,10 +109,10 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 					propertyName = parentNode.getNextDefaultPropertyName();
 				}
 				TreeItemFactory.createPropertyTreeItem(propertyName, jsonValue, parentItem, index)
-					.getTreeItem().setExpanded(true);
+					.select().getTreeItem().setExpanded(true);
 			} else { // ArrayElementNode
 				TreeItemFactory.createArrayElementTreeItem(jsonValue, parentItem, index)
-					.getTreeItem().setExpanded(true);
+					.select().getTreeItem().setExpanded(true);
 				parentNode.reindexArray();
 			}
 			dragEvent.consume();
