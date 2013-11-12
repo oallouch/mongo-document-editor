@@ -1,34 +1,49 @@
 package com.oallouch.mongodoc.output;
 
 import codearea.control.CodeArea;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
+import com.oallouch.mongodoc.embed.JFXContextInSwingApp;
 import com.oallouch.mongodoc.util.JsonUtils;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.InputEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
 public class JsonArea extends BorderPane {
-	private static final Pattern ERROR_PATTERN = Pattern.compile("line (.*?) column (.*?)\\z");
-
-	//private CodeArea codeArea;
-	private TextArea codeArea;
+	private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	
+	private ScheduledFuture parsingFuture;
+	private CodeArea codeArea;
 	private Label errorLabel;
 	private Map<String, Object> rootJsonObject;
 
 	public JsonArea() {
 		//-- UI controls --//
-		this.codeArea = new TextArea();//CodeArea();
+		this.codeArea = new CodeArea();
 		codeArea.textProperty().addListener((ChangeListener) (observableValue, oldText, newText) -> {
+			
+			//----------------- parsingFuture ----------------//
+			if (parsingFuture != null && !parsingFuture.isDone()) {
+				parsingFuture.cancel(false);
+			}
+			parsingFuture = scheduler.schedule(() -> {
+				Platform.runLater(this::completeParsing);
+			}, 500, TimeUnit.MILLISECONDS);
+			
+			//--- parsing for the value (not for coloring) ---//
 			String source = codeArea.getText();
 			try {
 				rootJsonObject = JsonUtils.toJsonObject(source);
@@ -37,15 +52,9 @@ public class JsonArea extends BorderPane {
 				}
 				errorLabel.setText(null);
 				fireEvent(new InputEvent(MODIFIED));
-			} catch (JsonSyntaxException e) {
-				String message = e.getMessage();
-				Matcher matcher = ERROR_PATTERN.matcher(message);
-				if (matcher.find()) {
-					message = "Parsing error at line " + matcher.group(1) + " and column " + matcher.group(2);
-				} else {
-					Logger.getLogger(JsonArea.class.getName()).log(Level.INFO, null, e);
-				}
-				errorLabel.setText(message);
+			} catch (JsonParseException e) {
+				JsonLocation errorLocation = e.getLocation();
+				errorLabel.setText("Parsing error at line " + errorLocation.getLineNr() + " and column " + errorLocation.getColumnNr());
 			}
 		});
 		setCenter(codeArea);
@@ -55,6 +64,60 @@ public class JsonArea extends BorderPane {
 		setBottom(errorLabel);
 	}
 
+	private void completeParsing() {
+		if (!Platform.isFxApplicationThread()) {
+			throw new RuntimeException("This method must be called from the JavaFX event Thread");
+		}
+		System.out.println("completeParsing");
+		String source = codeArea.getText();
+		try {
+			//------------------- first parsing ----------------//
+			JsonUtils.toJsonObject(source);
+			//------------------- second parsing ---------------//
+			JsonParser jsonParser = JsonUtils.getJsonFactory().createParser(source);
+			int lastParsedIndex = 0;
+			JsonToken currentToken;
+			while ((currentToken = jsonParser.nextToken()) != null) {
+				int locationStart = (int) jsonParser.getCurrentLocation().getCharOffset();
+				int length = -1;
+				String cssClass = null;
+				if (currentToken == JsonToken.FIELD_NAME) {
+					String propertyName = jsonParser.getText();
+					//------------ property name end => start -------------//
+					// pb: locationStart is the start of the value
+					while (true) {
+						char c = source.charAt(locationStart);
+						if (Character.isAlphabetic(c)) {
+							locationStart = locationStart - propertyName.length() + 1;
+							break;
+						}
+						locationStart--;
+					}
+					length = propertyName.length();
+					cssClass = "jsonTextProperty";
+				} else if (currentToken == JsonToken.START_ARRAY || currentToken == JsonToken.END_ARRAY) {
+					length = 1;
+					cssClass = "jsonTextArray";
+				} else if (currentToken == JsonToken.START_OBJECT || currentToken == JsonToken.END_OBJECT) {
+					length = 1;
+					cssClass = "jsonTextObject";
+				}
+				if (cssClass != null) {
+					int locationEnd = locationStart + length;
+					codeArea.clearStyleClasses(lastParsedIndex, locationStart);
+                    codeArea.setStyleClass(locationStart, locationEnd, cssClass);
+                    lastParsedIndex = locationEnd;
+				}
+			}
+			codeArea.clearStyleClasses(lastParsedIndex, source.length());
+		} catch (IOException e) {
+			// the first parsing failed => does nothing
+		}
+	}
+	
+	public static void shutdown() {
+		scheduler.shutdown();
+	}
 
 	public Map<String, Object> getRootJsonObject() {
 		return this.rootJsonObject;

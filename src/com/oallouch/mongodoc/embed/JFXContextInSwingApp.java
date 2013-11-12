@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.embed;
 
+import com.oallouch.mongodoc.output.JsonArea;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javafx.application.Platform;
@@ -23,6 +24,11 @@ public class JFXContextInSwingApp extends JComponent {
 		Platform.runLater(() -> {
 			jfxPanel.setScene(new Scene(new BorderPane()));
 		});
+	}
+	
+
+	public void shutdown() throws Exception {
+		JsonArea.shutdown();
 	}
 	
 	public static Window getJavaFXWindow() {

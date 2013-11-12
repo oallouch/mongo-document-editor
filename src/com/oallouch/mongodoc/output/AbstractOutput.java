@@ -9,11 +9,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractOutput extends BorderPane {
-	private TextArea textArea;
+	private CodeArea textArea;
 	private StringBuilder builder;
 	
 	public AbstractOutput() {
-		this.textArea = new TextArea();
+		this.textArea = new CodeArea();
 		textArea.setEditable(false);
 		setCenter(textArea);
 	}

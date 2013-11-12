@@ -1,5 +1,6 @@
 package com.oallouch.mongodoc.tree.cell;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.google.common.collect.Maps;
 import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.tree.TreeItemFactory;
@@ -77,14 +78,19 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 			//----------------------------------------------------------------//
 			String propertyName = null;
 			Object jsonValue;
-			String jsonText = (String) dragboard.getContent(DRAG_DROP_DATA_FORMAT_PROPERTY);
-			if (jsonText != null) {
-				Map.Entry<String, Object> jsonEntry = JsonUtils.toJsonObject(jsonText).entrySet().iterator().next();
-				propertyName = jsonEntry.getKey();
-				jsonValue = jsonEntry.getValue();
-			} else {
-				jsonText = (String) dragboard.getContent(DRAG_DROP_DATA_FORMAT_ARRAY_ELEMENT);
-				jsonValue = JsonUtils.toJsonObject(jsonText).values().iterator().next();
+			try {
+				String jsonText = (String) dragboard.getContent(DRAG_DROP_DATA_FORMAT_PROPERTY);
+				if (jsonText != null) {
+					Map.Entry<String, Object> jsonEntry = JsonUtils.toJsonObject(jsonText).entrySet().iterator().next();
+					propertyName = jsonEntry.getKey();
+					jsonValue = jsonEntry.getValue();
+				} else {
+					jsonText = (String) dragboard.getContent(DRAG_DROP_DATA_FORMAT_ARRAY_ELEMENT);
+					jsonValue = JsonUtils.toJsonObject(jsonText).values().iterator().next();
+				}
+			} catch (JsonParseException e) {
+				// should never happen
+				throw new RuntimeException(e);
 			}
 			
 			//----------------------------------------------------------------//

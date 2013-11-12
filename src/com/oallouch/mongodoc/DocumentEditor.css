@@ -9,3 +9,14 @@
 .floatingButton:hover {
 	-fx-background-color: #d0d0d0;
 }
+.jsonTextProperty {
+	-fx-fill: blue;
+}
+.jsonTextArray {
+	-fx-fill: orange;
+	-fx-font-weight: bolder;
+}
+.jsonTextObject {
+	-fx-fill: green;
+	-fx-font-weight: bolder;
+}

@@ -1,7 +1,7 @@
 package com.oallouch.mongodoc;
 
+import com.oallouch.mongodoc.output.JsonArea;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -45,14 +45,12 @@ public class MongoDocumentEditorFX extends Application {
 		primaryStage.show();
 	}
 
-	/**
-	 * The main() method is ignored in correctly deployed JavaFX application.
-	 * main() serves only as fallback in case the application can not be
-	 * launched through deployment artifacts, e.g., in IDEs with limited FX
-	 * support. NetBeans ignores main().
-	 *
-	 * @param args the command line arguments
-	 */
+	@Override
+	public void stop() throws Exception {
+		JsonArea.shutdown();
+	}
+	
+
 	public static void main(String[] args) {
 		launch(args);
 	}

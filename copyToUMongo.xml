@@ -1,6 +1,0 @@
-<project name="copyToUMongo" default="all" basedir=".">
-	<target name="all">
-		<!-- no need to copy the css. It's embedded in the jar. -->
-		<!--<copy file="src/com/oallouch/mongodoc/DocumentEditor.css" todir="../umongo/resource/fxcss/"/>-->
-	</target>
-</project>

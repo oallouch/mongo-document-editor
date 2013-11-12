@@ -21,6 +21,7 @@ public class OutputPane extends TabPane {
 			e.consume(); // or it would also be seen as an OutputPane event
 			if (!tempEventBlocking) {
 				System.out.println("JsonArea MODIFIED");
+				updateOutputs();
 				fireEvent(new InputEvent(MODIFIED));
 			}
 		});
@@ -45,13 +46,19 @@ public class OutputPane extends TabPane {
 		tempEventBlocking = true;
 		try {
 			jsonArea.setRootJsonObject(jsonObject);
-			// very fast, no need to see if it's visible or not
-			javaOutput.setRootJsonObject(jsonObject);
-			phpOutput.setRootJsonObject(jsonObject);
+			updateOutputs();
 		} finally {
 			tempEventBlocking = false;
 		}
 	}
+	
+	private void updateOutputs() {
+		Map<String, Object> jsonObject = getRootJsonObject();
+		// very fast, no need to see if it's visible or not
+		javaOutput.setRootJsonObject(jsonObject);
+		phpOutput.setRootJsonObject(jsonObject);
+	}
+	
 	public String getJsonText() {
 		return jsonArea.getJsonText();
 	}

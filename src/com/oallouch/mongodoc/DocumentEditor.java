@@ -4,6 +4,7 @@ import com.mongodb.DBObject;
 import com.oallouch.mongodoc.output.OutputPane;
 import com.oallouch.mongodoc.tree.DocumentTree;
 import java.util.Map;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.InputEvent;
@@ -16,14 +17,14 @@ public class DocumentEditor extends SplitPane {
 
 	public DocumentEditor() {
 		documentTree = new DocumentTree();
-		documentTree.addEventHandler(MODIFIED, e -> {
+		documentTree.addEventHandler(MODIFIED, event -> {
 			System.out.println("documentTree MODIFIED");
 			Map<String, Object> jsonObject = documentTree.getRootJsonObject();
 			outputPane.setRootJsonObject(jsonObject);
 		});
 
 		outputPane = new OutputPane();
-		outputPane.addEventHandler(MODIFIED, e -> {
+		outputPane.addEventHandler(MODIFIED, event -> {
 			System.out.println("outputPane MODIFIED");
 			documentTree.setRootJsonObject(outputPane.getRootJsonObject());
 		});

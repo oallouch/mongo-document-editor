@@ -103,7 +103,6 @@ public class NameColumnCell extends AbstractCell {
 					cancelEdit();
 				}
 			});
-			combo.setOnAction(t -> cancelEdit());
 		}
 		combo.setValue(node.toString());
 
