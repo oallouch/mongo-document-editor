@@ -5,6 +5,9 @@ import com.oallouch.mongodoc.tree.DataType;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
@@ -58,6 +61,7 @@ public class ValueColumnCell extends AbstractValueColumnCell {
 	private TextField getTextField(String text) {
 		if (textField == null) {
 			textField = new TextField();
+			textField.setPadding(new Insets(3, 3, 3, 3));
 			textField.setOnKeyReleased(t -> {
 				if (t.getCode() == KeyCode.ESCAPE) {
 					textField.setText(getItem().toString());
@@ -74,6 +78,7 @@ public class ValueColumnCell extends AbstractValueColumnCell {
 	private Node getDateField(Date value) {
 		if (dateField == null) {
 			dateField = new DateField(SimpleDateFormat.getDateTimeInstance());
+			dateField.setPadding(new Insets(3, 3, 3, 3));
 			dateField.setPopupButtonVisible(true);
 		}
 		dateField.setValue(value);

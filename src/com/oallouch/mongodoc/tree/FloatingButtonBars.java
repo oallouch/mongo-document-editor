@@ -12,15 +12,16 @@ import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
 import javafx.scene.input.InputEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
 public class FloatingButtonBars {
@@ -76,6 +77,20 @@ public class FloatingButtonBars {
 			selectedNode.remove();
 			treeTable.requestFocus(); // the button stole it
 			treeTable.fireEvent(new InputEvent(DocumentEditor.MODIFIED));
+			
+			
+			
+			
+			
+			Region clippedContainer = (Region) FXUtils.getVirtualFlow(treeTable)
+				.getChildrenUnmodifiable().get(0);
+			Group group = (Group) clippedContainer.getChildrenUnmodifiable().get(0);
+			double height = group.getBoundsInLocal().getHeight();
+			System.out.println("group.height: " + height);
+			
+			
+			
+			
 		});
 		lineButtonBar = new HBox(removeNodeButton);
 		lineButtonBar.setAlignment(Pos.CENTER);

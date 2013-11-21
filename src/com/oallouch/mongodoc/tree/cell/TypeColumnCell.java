@@ -2,10 +2,16 @@ package com.oallouch.mongodoc.tree.cell;
 
 import com.oallouch.mongodoc.DocumentEditor;
 import com.oallouch.mongodoc.tree.DataType;
+import com.oallouch.mongodoc.util.FXUtils;
+import com.sun.javafx.scene.control.skin.ComboBoxBaseSkin;
 import java.util.Arrays;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.input.InputEvent;
 
 public class TypeColumnCell extends AbstractValueColumnCell {
@@ -29,6 +35,14 @@ public class TypeColumnCell extends AbstractValueColumnCell {
 		if (combo == null) {
 			ObservableList<DataType> dataTypeList = FXCollections.observableArrayList(Arrays.asList(DataType.values()));
 			combo = new ComboBox<>(dataTypeList);
+			FXUtils.whenExists(combo.skinProperty(), (skin) -> {
+				ComboBoxBaseSkin comboSkin = (ComboBoxBaseSkin) skin;
+				ListCell comboDisplayNode = (ListCell) comboSkin.getDisplayNode();
+				comboDisplayNode.setPadding(new Insets(0, 2, 0, 2));
+			});
+			double comboHeight = getHeight() - 2;
+			combo.setMinHeight(comboHeight);
+			combo.setMaxHeight(comboHeight);
 			combo.setOnAction(t -> cancelEdit());
 		}
 		return combo;

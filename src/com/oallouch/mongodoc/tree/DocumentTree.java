@@ -3,28 +3,40 @@ package com.oallouch.mongodoc.tree;
 import com.oallouch.mongodoc.tree.cell.TypeColumnCell;
 import com.oallouch.mongodoc.tree.cell.ValueColumnCell;
 import com.oallouch.mongodoc.tree.cell.NameColumnCell;
-import static com.oallouch.mongodoc.DocumentEditor.MODIFIED;
 import com.oallouch.mongodoc.tree.cell.NameColumnValueFactory;
 import com.oallouch.mongodoc.tree.node.AbstractNode;
 import com.oallouch.mongodoc.util.FXUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
+import javafx.scene.control.Skin;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import javafx.scene.input.InputEvent;
 import javafx.scene.layout.Pane;
 
 
 public class DocumentTree extends Pane {
+	/**
+	 * very important to be able to quickly calculate the preferred height
+	 */
+	public static final double FIXED_CELL_HEIGHT = 30;
+	
 	private TreeTableView<AbstractNode> treeTable;
 	private TreeItem hiddenRootItem;
+	private ReadOnlyDoubleWrapper heightWhenAllVisible = new ReadOnlyDoubleWrapper();;
     
-    public DocumentTree() {
+    public DocumentTree(boolean editable) {
 		treeTable = new TreeTableView<>();
+		treeTable.setEditable(editable);
+		
 		TreeTableColumn nameCol = new TreeTableColumn<>("Name"); // generics can't be used here
 		nameCol.setCellValueFactory(new NameColumnValueFactory());
 		nameCol.setCellFactory(treeTableColumn -> new NameColumnCell());
@@ -45,8 +57,15 @@ public class DocumentTree extends Pane {
 		treeTable.getColumns().setAll(nameCol, valueCol, typeCol);
 		
 		treeTable.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
-		treeTable.setEditable(true);
 		treeTable.getSelectionModel().setCellSelectionEnabled(true);
+		treeTable.setFixedCellSize(FIXED_CELL_HEIGHT);
+		
+		FXUtils.whenExists(treeTable.skinProperty(), (skin) -> {
+			heightWhenAllVisible.bind(
+				treeTable.expandedItemCountProperty().multiply(FIXED_CELL_HEIGHT)
+				.add(FXUtils.getTableHeaderRow(treeTable).heightProperty())
+				.add(4)); // 4 should be replaced by insets calculations
+		});
 		
 		hiddenRootItem = new TreeItem();
 		treeTable.setRoot(hiddenRootItem);
@@ -54,9 +73,15 @@ public class DocumentTree extends Pane {
 		
 		this.getChildren().add(treeTable);
 		
-		new FloatingButtonBars(this, treeTable);
+		//minHeightProperty().bind(treeTable.heightProperty());
+		//prefHeightProperty().bind(treeTable.heightProperty());
+		//maxHeightProperty().bind(treeTable.heightProperty());
+		
+		if (editable) {
+			new FloatingButtonBars(this, treeTable);
+		}
     }
-
+	
 	@Override
 	protected void layoutChildren() {
 		super.layoutChildren(); // to autosize children
@@ -99,5 +124,12 @@ public class DocumentTree extends Pane {
 	
 	public TreeTableRow<AbstractNode> getTreeTableRow(TreeItem<AbstractNode> treeItem) {
 		return FXUtils.getTreeTableRow(treeTable, treeItem);
+	}
+	
+	public double getHeightWhenAllVisible() {
+		return heightWhenAllVisible.get();
+	}
+	public ReadOnlyDoubleProperty heightWhenAllVisibleProperty() {
+		return heightWhenAllVisible.getReadOnlyProperty();
 	}
 }

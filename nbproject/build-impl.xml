@@ -27,27 +27,6 @@ is divided into following sections:
             </not>
         </condition>
     </fail>
-	
-	
-	
-	
-	
-	
-	<target name="copyToUMongo" depends="-do-jar-without-libraries">
-		<delete dir="../umongo/lib/ext"/>
-		<copy todir="../umongo/lib/ext">
-			<fileset dir="dist/lib" includes="jidefx*"/>
-			<fileset dir="dist/lib" includes="guava*"/>
-			<fileset file="dist/mongo-document-editor.jar"/>
-		</copy>
-	</target>
-	
-	
-	
-	
-	
-	
-	
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
     <!-- 
                 ======================

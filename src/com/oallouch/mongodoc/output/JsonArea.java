@@ -34,7 +34,6 @@ public class JsonArea extends BorderPane {
 		//-- UI controls --//
 		this.codeArea = new CodeArea();
 		codeArea.textProperty().addListener((ChangeListener) (observableValue, oldText, newText) -> {
-			
 			//----------------- parsingFuture ----------------//
 			if (parsingFuture != null && !parsingFuture.isDone()) {
 				parsingFuture.cancel(false);
@@ -47,6 +46,7 @@ public class JsonArea extends BorderPane {
 			String source = codeArea.getText();
 			try {
 				rootJsonObject = JsonUtils.toJsonObject(source);
+				rootJsonObject = JsonUtils.putSpecialJavaTypes(rootJsonObject);
 				if (rootJsonObject == null) {
 					rootJsonObject = Collections.emptyMap();
 				}
@@ -68,7 +68,6 @@ public class JsonArea extends BorderPane {
 		if (!Platform.isFxApplicationThread()) {
 			throw new RuntimeException("This method must be called from the JavaFX event Thread");
 		}
-		System.out.println("completeParsing");
 		String source = codeArea.getText();
 		try {
 			//------------------- first parsing ----------------//
@@ -94,7 +93,7 @@ public class JsonArea extends BorderPane {
 						locationStart--;
 					}
 					length = propertyName.length();
-					cssClass = "jsonTextProperty";
+					cssClass = propertyName.startsWith("$") ? "jsonTextDollarProperty" : "jsonTextProperty";
 				} else if (currentToken == JsonToken.START_ARRAY || currentToken == JsonToken.END_ARRAY) {
 					length = 1;
 					cssClass = "jsonTextArray";
@@ -123,7 +122,8 @@ public class JsonArea extends BorderPane {
 		return this.rootJsonObject;
 	}
 	public void setRootJsonObject(Map<String, Object> jsonObject) {
-		String jsonText = JsonUtils.toJsonText(jsonObject);
+		jsonObject = JsonUtils.removeSpecialJavaTypes(jsonObject);
+		String jsonText = JsonUtils.toJsonTextPretty(jsonObject);
 		setJsonText(jsonText);
 	}
 	public String getJsonText() {

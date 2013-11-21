@@ -11,6 +11,11 @@
 }
 .jsonTextProperty {
 	-fx-fill: blue;
+	-fx-font-weight: bold;
+}
+.jsonTextDollarProperty {
+	-fx-fill: green;
+	-fx-font-weight: bold;
 }
 .jsonTextArray {
 	-fx-fill: orange;
@@ -19,4 +24,25 @@
 .jsonTextObject {
 	-fx-fill: green;
 	-fx-font-weight: bolder;
+}
+
+.cursorViewerLinesContainer {
+	-fx-background-color: white;
+}
+.cursorViewerExpandButtonContainer {
+	-fx-padding: 2 4 2 4;
+}
+.cursorViewerExpandButton {
+	-fx-background-color: #f0f0f0;
+	-fx-background-radius: 4px;
+	-fx-border-color: #d0d0d0;
+	-fx-padding: 1;
+	-fx-font-size: 10px;
+}
+.cursorViewerExpandButton:selected {
+	-fx-background-color: #d0d0d0;
+}
+
+.cursorViewerCell:focused {
+	-fx-background-color: gray;
 }

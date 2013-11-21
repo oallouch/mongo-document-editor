@@ -33,7 +33,9 @@ public abstract class AbstractValueColumnCell extends AbstractCell {
 		}
 		
 		this.dataType = DataType.getDataType(getItem());
-		
+		if (dataType == null) {
+			System.out.println("NULL DATA_TYPE");
+		}
 		updateItem(value, dataType);
 	}
 	

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import org.bson.types.ObjectId;
 
 public enum DataType {
 	NULL("Null", null, (java.lang.Object v) -> null, null),
@@ -40,6 +41,7 @@ public enum DataType {
 		}
 	}, Boolean.TRUE),
 	DATE("Date", Date.class, (java.lang.Object v) -> new Date(), null),
+	OBJECT_ID("ObjectId", ObjectId.class, (java.lang.Object v) -> new ObjectId(), null),
 	PATTERN("Pattern", Pattern.class, (java.lang.Object v) -> {
 		if (v instanceof Pattern) {
 			return (Pattern) v;

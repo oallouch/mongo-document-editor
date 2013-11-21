@@ -11,6 +11,7 @@ import com.oallouch.mongodoc.util.FXUtils;
 import com.oallouch.mongodoc.util.JsonUtils;
 import java.util.Collections;
 import java.util.Map;
+import javafx.geometry.Insets;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.DataFormat;
@@ -25,6 +26,8 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 	protected static final DataFormat DRAG_DROP_DATA_FORMAT_PROPERTY = new DataFormat("serialized json property");
 	protected static final DataFormat DRAG_DROP_DATA_FORMAT_ARRAY_ELEMENT = new DataFormat("serialized json array element");
 	protected static final DataFormat DRAG_DROP_DATA_FORMAT_PATH = new DataFormat("json path");
+	
+	private Insets readPadding;
 	
 	public AbstractCell() {
 		setOnDragDetected(mouseEvent -> {
@@ -42,7 +45,7 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 				dataFormat = DRAG_DROP_DATA_FORMAT_ARRAY_ELEMENT;
 				jsonObject = Collections.singletonMap("array value", jsonValue);
 			}
-			String jsonText = JsonUtils.toJsonText(jsonObject);
+			String jsonText = JsonUtils.toJsonTextPretty(jsonObject);
 			
 			//-- content --//
 			Map<DataFormat, Object> content = Maps.newHashMapWithExpectedSize(2);
@@ -133,4 +136,23 @@ public abstract class AbstractCell extends TreeTableCell<AbstractNode, Object> {
 	protected TreeItem<AbstractNode> getTreeItem() {
 		return getAbstractNode().getTreeItem();
 	}
+
+	@Override
+	public void startEdit() {
+		if (readPadding == null) {
+			readPadding = getPadding();
+		}
+		setPadding(Insets.EMPTY);
+		super.startEdit();
+	}
+
+	@Override
+	public void cancelEdit() {
+		if (readPadding != null) { // cancelEdit can be called before startEdit
+			setPadding(readPadding);
+		}
+		super.cancelEdit();
+	}
+	
+	
 }

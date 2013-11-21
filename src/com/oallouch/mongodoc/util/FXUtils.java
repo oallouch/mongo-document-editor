@@ -3,6 +3,10 @@ package com.oallouch.mongodoc.util;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import com.sun.javafx.scene.control.skin.TreeTableViewSkin;
 import com.sun.javafx.scene.control.skin.VirtualFlow;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -38,6 +42,25 @@ public class FXUtils {
 			}
 		}
 		return null;
+	}
+	
+	public static <T> void whenExists(ObservableValue<T> observable, Consumer<T> consumer) {
+		when(observable, t -> t != null, consumer);
+	}
+	public static <T> void when(ObservableValue<T> observable, Predicate<T> predicate, Consumer<T> consumer) {
+		if (predicate.test(observable.getValue())) {
+			consumer.accept(observable.getValue());
+		} else {
+			ChangeListener[] listenerHolder = new ChangeListener[1];
+			final ChangeListener<T> listener = (observable1, oldValue, newValue) -> {
+				if (predicate.test(newValue)) {
+					consumer.accept(newValue);
+					observable.removeListener(listenerHolder[0]);
+				}
+			};
+			listenerHolder[0] = listener;
+			observable.addListener(listener);
+		}
 	}
 	
 	/**
