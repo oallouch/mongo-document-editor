@@ -12,7 +12,8 @@ import java.util.Base64;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class TestCursorViewer extends Application {
@@ -38,8 +39,9 @@ public class TestCursorViewer extends Application {
 		cursor.close();
 
 
-		StackPane root = new StackPane();
-		root.getChildren().add(cursorViewer);
+		BorderPane root = new BorderPane();
+		root.setCenter(cursorViewer);
+		root.setBottom(new Label("bottom part to check the clipping rectangle"));
 
 		Scene scene = new Scene(root, 1000, 500);
 		scene.getStylesheets().add("com/oallouch/mongodoc/DocumentEditor.css");

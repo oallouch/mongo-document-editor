@@ -6,6 +6,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.oallouch.mongodoc.tree.DocumentTree;
+import com.oallouch.mongodoc.util.ClippedContainer;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -13,23 +14,31 @@ import java.util.List;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import static javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 public class CursorViewer extends Pane {
 	private static final int EXPAND_BUTTON_WIDTH = 25;
-	private VBox linesContainer;
-	private Pane linesContainerScroll;
+	private VBox lineList;
+	private ScrollBar scrollBar;
+	private BorderPane bottomPart;
 	
 	public CursorViewer(DBCursor cursor) {
 		
@@ -65,30 +74,11 @@ public class CursorViewer extends Pane {
 			table.getColumns().add(column);
 			columnByPropertyName.put(propertyName, column);
 		}
-		table.getChildrenUnmodifiable().addListener((Change<? extends Node> c) -> {
-			while (c.next()) {
-				List<? extends Node> addedNodes = c.getAddedSubList();
-				for (Node node : addedNodes) {
-					if (node instanceof TableHeaderRow) {
-						TableHeaderRow tableHeaderRow = (TableHeaderRow) node;
-						linesContainerScroll.layoutYProperty().bind(tableHeaderRow.heightProperty());
-						linesContainerScroll.prefHeightProperty().bind(
-							Bindings.subtract(heightProperty(), tableHeaderRow.heightProperty()));
-					}
-				}
-			}
-		});
-		table.setLayoutX(EXPAND_BUTTON_WIDTH);
-		table.prefWidthProperty().bind(Bindings.subtract(widthProperty(), EXPAND_BUTTON_WIDTH));
 		table.setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
 		
 		//----------------- Lines -------------------//
-		this.linesContainer = new VBox();
-		linesContainer.getStyleClass().add("cursorViewerLinesContainer");
-		this.linesContainerScroll = new HBox(linesContainer);//ScrollPane(linesContainer);
-		//linesContainerScroll.setFocusTraversable(false);
-		linesContainerScroll.prefWidthProperty().bind(widthProperty());
-		getChildren().add(linesContainerScroll);
+		this.lineList = new VBox();
+		lineList.getStyleClass().add("cursorViewerLinesContainer");
 		for (DBObject document : documents) {
 			HBox line = new HBox();
 			DocumentInTable documentInTable = new DocumentInTable();
@@ -126,8 +116,63 @@ public class CursorViewer extends Pane {
 				line.getChildren().add(label);
 				label.prefWidthProperty().bind(columnByPropertyName.get(propertyName).widthProperty());
 			}
-			linesContainer.getChildren().add(line);
+			lineList.getChildren().add(line);
 		}
+		
+		//--------------- ScrollBar -----------------//
+		scrollBar = new ScrollBar();
+		scrollBar.setOrientation(Orientation.VERTICAL);
+		scrollBar.setMin(0);
+		lineList.layoutYProperty().bind(scrollBar.valueProperty().multiply(-1));
+		getChildren().add(scrollBar);
+		
+		//------------------------- layout --------------------------//
+		table.setLayoutX(EXPAND_BUTTON_WIDTH);
+		table.prefWidthProperty().bind(Bindings
+			.subtract(widthProperty(), EXPAND_BUTTON_WIDTH)
+			.subtract(scrollBar.widthProperty()));
+		
+		this.bottomPart = new BorderPane();
+		//-- ClippedContainer --//
+		ClippedContainer lineListContainer = new ClippedContainer(lineList);
+		lineListContainer.prefWidthProperty().bind(lineList.widthProperty());
+		lineListContainer.prefHeightProperty().bind(bottomPart.heightProperty());
+		
+		scrollBar.maxProperty().bind(lineList.heightProperty().subtract(lineListContainer.heightProperty()));
+		// JavaFX bug
+		Platform.runLater(() -> {
+			scrollBar.maxProperty().addListener((observable, oldValue, newValue) -> {
+				if (newValue.doubleValue() < oldValue.doubleValue() && scrollBar.getValue() > newValue.doubleValue()) {
+					scrollBar.setValue(newValue.doubleValue());
+				}
+			});
+		});
+		/*scrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
+			System.out.println("new Value: " + newValue);
+		});*/
+		
+		bottomPart.setCenter(lineListContainer);
+		bottomPart.setRight(scrollBar);
+		
+		BorderPane.setAlignment(lineListContainer, Pos.TOP_CENTER);
+		
+		bottomPart.prefWidthProperty().bind(widthProperty());
+		bottomPart.setMinHeight(USE_PREF_SIZE);
+		bottomPart.setMaxHeight(USE_PREF_SIZE);
+		table.getChildrenUnmodifiable().addListener((Change<? extends Node> c) -> {
+			while (c.next()) {
+				List<? extends Node> addedNodes = c.getAddedSubList();
+				for (Node node : addedNodes) {
+					if (node instanceof TableHeaderRow) {
+						TableHeaderRow tableHeaderRow = (TableHeaderRow) node;
+						bottomPart.layoutYProperty().bind(tableHeaderRow.heightProperty());
+						bottomPart.prefHeightProperty().bind(
+							Bindings.subtract(heightProperty(), tableHeaderRow.heightProperty()));
+					}
+				}
+			}
+		});
+		getChildren().add(bottomPart);
 	}
 	
 	private class DocumentInTable {
@@ -143,14 +188,14 @@ public class CursorViewer extends Pane {
 				documentTree.setMaxHeight(USE_PREF_SIZE);
 				documentTree.heightWhenAllVisibleProperty().addListener((observable, oldValue, newValue) -> {
 					documentTree.setPrefHeight(newValue.doubleValue());
-					Platform.runLater(linesContainer::requestLayout); // must be a JavaFX bug
+					Platform.runLater(lineList::requestLayout); // must be a JavaFX bug
 				});
 				documentTree.setRootJsonObject((BasicDBObject) document);
-				int lineIndex = linesContainer.getChildren().indexOf(tableLine);
-				linesContainer.getChildren().add(lineIndex + 1, documentTree);
+				int lineIndex = lineList.getChildren().indexOf(tableLine);
+				lineList.getChildren().add(lineIndex + 1, documentTree);
 				expanded = true;
 			} else {
-				linesContainer.getChildren().remove(documentTree);
+				lineList.getChildren().remove(documentTree);
 				documentTree = null;
 				expanded = false;
 			}
