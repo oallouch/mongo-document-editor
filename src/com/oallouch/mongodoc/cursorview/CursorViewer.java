@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -32,7 +30,6 @@ import javafx.scene.layout.Pane;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 
 public class CursorViewer extends Pane {
 	private static final int EXPAND_BUTTON_WIDTH = 25;
@@ -40,10 +37,10 @@ public class CursorViewer extends Pane {
 	private ScrollBar scrollBar;
 	private BorderPane bottomPart;
 	
-	public CursorViewer(DBCursor cursor) {
+	public CursorViewer(DBCursor cursor, int limit) {
 		
 		//------------ DBCursor => List -------------//
-		int remaining = 60;
+		int remaining = Math.min(limit, 100);
 		List<DBObject> documents = new ArrayList<>(remaining);
 		while (cursor.hasNext() && remaining-- > 0) {
 			documents.add(cursor.next());

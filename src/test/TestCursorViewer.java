@@ -23,7 +23,13 @@ public class TestCursorViewer extends Application {
 		DBCursor cursor;
 		try {
 			String computerName = InetAddress.getLocalHost().getHostName();
-			String input = "Z3lgcGR0fXZ5b2Z0";
+			
+			/*String clearServerIP = "clear server ip";
+			byte[] encoded = xor(clearServerIP.getBytes("ISO-8859-1"), computerName.getBytes("UTF-8"));
+			String encodedStr = new String(Base64.getEncoder().encode(encoded));
+			System.out.println("encodedStr: " + encodedStr);*/
+			
+			String input = "Z3lgcGR0fX5+dXpzYH0=";
 			byte[] inputDecoded = Base64.getDecoder().decode(input);
 			String serverIP = new String(xor(inputDecoded, computerName.getBytes("UTF-8")), "ISO-8859-1");
 			System.out.println("serverIP: " + serverIP);
@@ -35,7 +41,7 @@ public class TestCursorViewer extends Application {
 		}
 		
 		
-		CursorViewer cursorViewer = new CursorViewer(cursor);
+		CursorViewer cursorViewer = new CursorViewer(cursor, 50);
 		cursor.close();
 
 
