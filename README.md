@@ -1,5 +1,5 @@
 # mongo-document-editor
-mongodb document editor in JavaFX
+mongodb document editor in JavaFX for umongo
 
 Adds a JavaFX TreeTable at the collection viewer and a component to build queries that can output them as php or Java source code.
 
